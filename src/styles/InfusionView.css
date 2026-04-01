@@ -1,0 +1,266 @@
+/* InfusionView styles were merged into src/App.css on 2026-03-28.
+  This file intentionally left blank to avoid accidental overrides.
+*/
+
+
+
+/* Tab Navigation */
+.infusion-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  background-color: #111920;
+  border-radius: 4px;
+  border: 1px solid #2a3b4c;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 15px;
+  background: transparent;
+  color: #c5d3df;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tab-btn.active {
+  color: #fff;
+  background: #208b76;
+  font-weight: 700;
+}
+
+/* Content Area */
+.infusion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  flex: 1;
+}
+
+/* Type Section */
+.type-section {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.type-label {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0 5px;
+}
+
+/* Action Card */
+/* Action Card - Match SkillingView style */
+.infusion-action-card {
+  position: relative;
+  border-radius: 6px;
+  padding: 20px 15px 30px 15px;
+  text-align: center;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  transition: all 0.3s ease;
+  background: #111920;
+  border: 1px solid #208b76;
+  cursor: pointer;
+}
+
+.infusion-action-card:hover:not(.unaffordable) {
+  background: #163231;
+  border-color: #4affd4;
+  box-shadow: 0 0 10px rgba(74, 255, 212, 0.2);
+}
+
+.infusion-action-card.unaffordable {
+  background: #1a1010;
+  border: 1px solid #b33a3a;
+  box-shadow: inset 0 0 15px rgba(231, 76, 60, 0.15);
+  opacity: 0.7;
+  cursor: default;
+}
+
+.infusion-action-card.active {
+  background: #163231;
+  border: 1px solid #4affd4;
+  box-shadow: 0 0 10px rgba(74, 255, 212, 0.2);
+}
+
+/* Card content */
+.card-name {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #fff;
+}
+
+.card-meta {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  color: #7b95a6;
+}
+
+.card-time {
+  margin: 0 0 15px 0;
+  font-size: 12px;
+  color: #c5d3df;
+}
+
+/* Icon display (center) */
+.card-icon-container {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.card-icon-main {
+  max-height: 80px;
+  max-width: 80px;
+  object-fit: contain;
+}
+
+.icon-arrow {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Qty Counter (bottom right) */
+.card-qty {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Cost Display (bottom left, like SkillingView) */
+.cost-display {
+  position: absolute;
+  bottom: 12px;
+  left: 4px;
+  display: flex;
+  gap: 1px;
+  align-items: center;
+}
+
+.cost-item-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40px;
+  position: relative;
+}
+
+.cost-required {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #2ecc71;
+  z-index: 3;
+}
+
+.cost-item-badge.unaffordable .cost-required {
+  color: #e74c3c;
+}
+
+.cost-icon-box {
+  position: relative;
+  width: 36px;
+  height: 28px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #2ecc71;
+  background: #0b1014;
+}
+
+.cost-item-badge.unaffordable .cost-icon-box {
+  border: 1px solid #b33a3a;
+}
+
+.cost-icon {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.cost-available {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  font-size: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 2px 5px;
+  border-radius: 6px;
+  color: #4affd4;
+  font-weight: bold;
+  z-index: 4;
+}
+
+/* Progress bar (bottom) */
+.progress-bar-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-color: #0b1014;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #2ecc71;
+  transition: width 0.1s linear;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .infusion-view {
+    padding: 15px;
+    gap: 15px;
+  }
+
+  .infusion-action-card {
+    grid-template-columns: auto auto 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .cost-items {
+    min-width: 100px;
+  }
+
+  .reward-item {
+    min-width: 55px;
+  }
+
+  .action-details {
+    min-height: 80px;
+  }
+}
