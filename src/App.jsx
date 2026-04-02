@@ -37,18 +37,13 @@ import { useCombat } from './hooks/useCombat';
 import { useSkilling } from './hooks/useSkilling';
 import { useEquipment } from './hooks/useEquipment';
 import { useShop } from './hooks/useShop';
-import { useAuth } from './hooks/useAuth';
 import { useCloudSave } from './hooks/useCloudSave';
-import AuthScreen from './components/AuthScreen';
 import { useFightCave } from './hooks/useFightCave';
 import { useClan } from './hooks/useClan';
 import { useMarket } from './hooks/useMarket';
 import { useSlayer } from './hooks/useSlayer';
 
-export default function App() {
-  // --- 0. AUTH ---
-  const { user, loading: authLoading, signUp, signIn, signOut } = useAuth();
-
+export default function App({ user, signOut }) {
   // --- 1. BASIC STATE ---
   const [screen, setScreen] = useState('profile'); 
   const [activePopup, setActivePopup] = useState(null); 
@@ -645,6 +640,10 @@ export default function App() {
   };
   const slayer = useSlayer(SLAYER_MASTERS, ACTIONS, handleSlayerTaskComplete);
 
+  // Ref for slayer save/load
+  const slayerRef = useRef({ currentTask: slayer.currentTask, slayerPoints: slayer.slayerPoints, consecutive: slayer.consecutive });
+  useEffect(() => { slayerRef.current = { currentTask: slayer.currentTask, slayerPoints: slayer.slayerPoints, consecutive: slayer.consecutive }; }, [slayer.currentTask, slayer.slayerPoints, slayer.consecutive]);
+
   // Shop functions
   const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade } = useShop(setInventory, inventory);
 
@@ -663,7 +662,7 @@ export default function App() {
   useEffect(() => { marketRef.current = { marketOffers, marketSlots, orderHistory }; }, [marketOffers, marketSlots, orderHistory]);
 
   // Save/Load system (Cloud + Local hybrid)
-  const { hardResetGame } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder);
+  const { hardResetGame } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, slayerRef, slayer.setCurrentTask, slayer.setSlayerPoints, slayer.setConsecutive, stopAction);
 
   // Market simulation tick (elke 4 seconden)
   useEffect(() => {
@@ -676,18 +675,6 @@ export default function App() {
   // Only use Lava background when the player actually started the lava cave
   const useLavaBg = activeAction === 'lava_cave' && screen === 'combat' && fightCaveActive;
 
-  // Auth gate — show login screen if not authenticated
-  if (authLoading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0e17', color: '#4affd4', fontSize: '24px' }}>
-        <span style={{ fontSize: '48px', marginRight: '16px' }}>⚔️</span> Loading...
-      </div>
-    );
-  }
-  if (!user) {
-    return <AuthScreen onSignIn={signIn} onSignUp={signUp} />;
-  }
-
   return (
     <div className="app-layout" style={{ backgroundImage: `url(${useLavaBg ? lavaBg : bgImage})` }}>
       <LevelUpToast levelUps={levelUps} activeAction={activeAction} ACTIONS={ACTIONS} screen={screen} />
@@ -699,7 +686,7 @@ export default function App() {
         <Sidebar screen={screen} setScreen={setScreen} skills={skills} />
 
         <main className="content-area">
-          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} />}
+          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} />}
           {screen === 'inventory' && <InventoryView inventory={inventory} ARMOR={ARMOR} equipment={equipment} equipmentAmounts={equipmentAmounts} WEAPONS={WEAPONS} AMMO={AMMO} toggleEquip={toggleEquip} combatStyle={combatStyle} setCombatStyle={setCombatStyle} sellItemToShop={sellItemToShop} setActivePopup={setActivePopup} depositToVault={depositToVault} clan={clan} setInventory={setInventory} inventoryOrder={inventoryOrder} setInventoryOrder={setInventoryOrder} />}
           {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} />}
           {screen === 'clan' && (

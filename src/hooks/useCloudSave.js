@@ -2,7 +2,9 @@ import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { calculateOfflineProgress } from '../utils/offlineProgress';
 
-const LOCAL_SAVE_KEY = 'idleScape_save_v1';
+const getLocalSaveKey = (userId) => {
+  return userId ? `idleScape_save_v1_${userId}` : 'idleScape_save_v1';
+};
 
 export function useCloudSave(
   userId,
@@ -30,10 +32,22 @@ export function useCloudSave(
   toolboxes, setToolboxes,
   addXp,
   setOfflineProgress,
-  inventoryOrderRef, setInventoryOrder
+  inventoryOrderRef, setInventoryOrder,
+  slayerRef, setSlayerCurrentTask, setSlayerPoints, setSlayerConsecutive,
+  stopAction
 ) {
   const saveInProgress = useRef(false);
-  const hasLoaded = useRef(false);
+  const hasLoaded = useRef({});
+
+  // Helper: check if user has loaded (per userId)
+  const userHasLoaded = (uid) => {
+    return hasLoaded.current[uid] === true;
+  };
+
+  // Helper: mark user as loaded
+  const markUserAsLoaded = (uid) => {
+    hasLoaded.current[uid] = true;
+  };
 
   // Helper: bouw het game-state object (zelfde structuur als de oude localStorage save)
   const buildGameState = useCallback(() => {
@@ -49,6 +63,7 @@ export function useCloudSave(
       inventoryOrder: inventoryOrderRef?.current || [],
       clan,
       market: marketRef?.current || null,
+      slayer: slayerRef?.current || null,
       lastSaveTimestamp: Date.now(),
       activeAction
     };
@@ -57,6 +72,9 @@ export function useCloudSave(
   // Helper: pas een parsed save toe op alle state setters
   const applySave = useCallback((parsed) => {
     try {
+      // FIRST: Stop any active action from previous account
+      if (stopAction) stopAction();
+
       let loadedInventory = inventoryRef.current;
       let loadedEquipment = equipment;
       let loadedSkills = {};
@@ -80,6 +98,11 @@ export function useCloudSave(
         if (parsed.market.orderHistory && setOrderHistory) setOrderHistory(parsed.market.orderHistory);
       }
       if (parsed.activeAction && setActiveAction) setActiveAction(parsed.activeAction);
+      if (parsed.slayer) {
+        if (parsed.slayer.currentTask && setSlayerCurrentTask) setSlayerCurrentTask(parsed.slayer.currentTask);
+        if (typeof parsed.slayer.slayerPoints === 'number' && setSlayerPoints) setSlayerPoints(parsed.slayer.slayerPoints);
+        if (typeof parsed.slayer.consecutive === 'number' && setSlayerConsecutive) setSlayerConsecutive(parsed.slayer.consecutive);
+      }
 
       // Offline progressie berekening
       if (parsed.lastSaveTimestamp && parsed.activeAction && ACTIONS) {
@@ -109,12 +132,12 @@ export function useCloudSave(
     } catch (e) {
       console.error('Save corrupt:', e);
     }
-  }, []);
+  }, [stopAction]);
 
   // ===== A. LADEN BIJ OPSTARTEN =====
   useEffect(() => {
-    if (!userId || hasLoaded.current) return;
-    hasLoaded.current = true;
+    if (!userId || userHasLoaded(userId)) return;
+    markUserAsLoaded(userId);
 
     const loadSave = async () => {
       let cloudParsed = null;
@@ -140,7 +163,7 @@ export function useCloudSave(
 
       // 2. Probeer localStorage te laden
       try {
-        const localRaw = localStorage.getItem(LOCAL_SAVE_KEY);
+        const localRaw = localStorage.getItem(getLocalSaveKey(userId));
         if (localRaw) {
           localParsed = JSON.parse(localRaw);
         }
@@ -182,7 +205,7 @@ export function useCloudSave(
 
       // Altijd naar localStorage schrijven (snel, betrouwbaar)
       try {
-        localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(gameState));
+        localStorage.setItem(getLocalSaveKey(userId), JSON.stringify(gameState));
       } catch (e) {
         console.error('Local save failed:', e);
       }
@@ -230,7 +253,7 @@ export function useCloudSave(
     const handleBeforeUnload = () => {
       const gameState = buildGameState();
       try {
-        localStorage.setItem(LOCAL_SAVE_KEY, JSON.stringify(gameState));
+        localStorage.setItem(getLocalSaveKey(userId), JSON.stringify(gameState));
       } catch (e) {
         // Ignore
       }
@@ -256,7 +279,7 @@ export function useCloudSave(
     }
 
     // Verwijder local save
-    localStorage.removeItem(LOCAL_SAVE_KEY);
+    localStorage.removeItem(getLocalSaveKey(userId));
 
     window.location.reload();
   };

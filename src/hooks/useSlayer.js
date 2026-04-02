@@ -95,6 +95,7 @@ export function useSlayer(SLAYER_MASTERS, ACTIONS, onTaskComplete) {
     cancelTask,
     autoCompleteTask,
     setCurrentTask,
-    setSlayerPoints
+    setSlayerPoints,
+    setConsecutive
   };
 }

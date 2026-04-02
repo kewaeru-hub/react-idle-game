@@ -1,12 +1,15 @@
 import React from 'react';
 
-export default function ProfileView({ skills, inventory }) {
+export default function ProfileView({ skills, inventory, user }) {
   // Bereken totalen
   const totalLevel = Object.values(skills).reduce((sum, s) => sum + s.level, 0);
   const totalXp = Math.floor(Object.values(skills).reduce((sum, s) => sum + s.xp, 0));
   
   // Bereken huidge offline uren
   const currentOfflineHours = 12 + (inventory?.offlineHoursUpgrade || 0);
+  
+  // Get username from user metadata or email
+  const username = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Speler';
 
   return (
     <div className="profile-grid">
@@ -14,7 +17,7 @@ export default function ProfileView({ skills, inventory }) {
       <div className="profile-col-left">
         <div className="card" style={{ margin: 0 }}>
           <h3 style={{ borderBottom: '1px solid #2a3b4c', paddingBottom: '10px', marginBottom: '10px' }}>User info</h3>
-          <p style={{ color: '#c5d3df', marginBottom: '5px' }}>Username: <strong>Speler</strong></p>
+          <p style={{ color: '#c5d3df', marginBottom: '5px' }}>Username: <strong>{username}</strong></p>
           <p style={{ color: '#c5d3df', marginBottom: '5px' }}>Game mode: <strong>Standard</strong></p>
           <p style={{ color: '#c5d3df', marginBottom: '5px' }}>Offline time: <strong>{currentOfflineHours}h / 24h</strong></p>
           <button className="top-btn" style={{ width: '100%', marginTop: '10px', backgroundColor: '#208b76' }}>Collection log</button>
