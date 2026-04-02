@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SHOP_STOCK, ITEMS, ITEM_IMAGES } from '../data/gameData';
 import ItemTooltip from './ItemTooltip'; 
 
-export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade }) {
+export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat }) {
   const [activeTab, setActiveTab] = useState('items');
   const [purchaseAmounts, setPurchaseAmounts] = useState({});
   const [upgradeAmount, setUpgradeAmount] = useState(1);
@@ -216,6 +216,41 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
             })() : (
               <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px', textAlign: 'center' }}>
                 <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>✓ Auto Tool Equip unlocked!</span>
+              </div>
+            )}
+          </div>
+
+          {/* Auto Eat Upgrade */}
+          <div className="card" style={{ padding: '20px', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <div>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '5px' }}>🍖 Auto Eat</h3>
+                <p style={{ color: '#c5d3df', fontSize: '14px', marginBottom: 0 }}>
+                  Automatically eats food from your inventory during combat when your HP drops below a chosen threshold.
+                </p>
+              </div>
+            </div>
+            {!(inventory.autoEatUpgrade) ? (() => {
+              const cost = 250_000;
+              const canAfford = (inventory.coins || 0) >= cost;
+              return (
+                <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontWeight: 'bold', color: 'white' }}>Auto Eat</span>
+                      <p style={{ fontSize: '12px', color: '#c5d3df', margin: '5px 0 0 0' }}>Set your eat threshold before each fight</p>
+                    </div>
+                    <button
+                      onClick={() => buyAutoEat(cost)}
+                      disabled={!canAfford}
+                      style={{ padding: '8px 20px', background: canAfford ? '#2ecc71' : '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: canAfford ? 'pointer' : 'not-allowed', fontWeight: 'bold', opacity: canAfford ? 1 : 0.5 }}
+                    >Buy ({cost.toLocaleString()} gp)</button>
+                  </div>
+                </div>
+              );
+            })() : (
+              <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px', textAlign: 'center' }}>
+                <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>✓ Auto Eat unlocked!</span>
               </div>
             )}
           </div>

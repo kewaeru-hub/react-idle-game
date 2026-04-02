@@ -1227,3 +1227,22 @@ export const POTION_EFFECTS = {
     icon: '⚡'
   }
 };
+
+// ==========================================
+// --- FOOD HEALING VALUES ---
+// ==========================================
+export const FOOD_HEALS = {
+  cooked_shrimp: 3,
+  cooked_meat: 4,
+  cooked_mackarel: 5,
+  cooked_cod: 6,
+  cooked_trout: 7,
+  cooked_big_meat: 8,
+  cooked_salmon: 9,
+  cooked_carp: 11,
+  cooked_great_meat: 12,
+  cooked_crab: 14,
+  cooked_anglerfish: 16,
+  cooked_tuna: 18,
+  cooked_shark: 20
+};

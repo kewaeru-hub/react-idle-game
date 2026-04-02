@@ -273,7 +273,7 @@ export default function CombatView({
 
         {/* FOOD & POTIONS */}
         <div style={{ marginTop: '12px', display: 'flex', gap: '10px' }}>
-          <button className="food-btn" onClick={() => eatFood('cooked_shrimp', 5)} disabled={getItemCount('cooked_shrimp') < 1} style={{flex: 1}}>🦐 Shrimp ({getItemCount('cooked_shrimp')})</button>
+          <button className="food-btn" onClick={() => eatFood('cooked_shrimp', 3)} disabled={getItemCount('cooked_shrimp') < 1} style={{flex: 1}}>🦐 Shrimp ({getItemCount('cooked_shrimp')})</button>
           <button 
             className="food-btn" 
             style={{backgroundColor: '#8e44ad', flex: 1}} 

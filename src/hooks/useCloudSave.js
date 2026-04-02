@@ -102,7 +102,7 @@ export function useCloudSave(
       }
       if (parsed.activeAction && setActiveAction) setActiveAction(parsed.activeAction);
       if (parsed.slayer) {
-        if (parsed.slayer.currentTask && setSlayerCurrentTask) setSlayerCurrentTask(parsed.slayer.currentTask);
+        if (setSlayerCurrentTask) setSlayerCurrentTask(parsed.slayer.currentTask || null);
         if (typeof parsed.slayer.slayerPoints === 'number' && setSlayerPoints) setSlayerPoints(parsed.slayer.slayerPoints);
         if (typeof parsed.slayer.consecutive === 'number' && setSlayerConsecutive) setSlayerConsecutive(parsed.slayer.consecutive);
       }
@@ -122,6 +122,31 @@ export function useCloudSave(
         if (offlineData) {
           setInventory(offlineData.newInventory);
           if (addXp) addXp(offlineData.skill, offlineData.totalXp);
+          // Combat also gives hitpoints XP
+          if (offlineData.isCombat && offlineData.hpXp && addXp) {
+            addXp('hitpoints', offlineData.hpXp);
+          }
+          // Update monsterStats with offline combat kills
+          if (offlineData.isCombat && offlineData.monsterStatsUpdate && setMonsterStats) {
+            setMonsterStats(prev => {
+              const updated = { ...prev };
+              Object.entries(offlineData.monsterStatsUpdate).forEach(([monsterId, stats]) => {
+                const existing = updated[monsterId] || { kills: 0, loot: {}, timeMs: 0 };
+                updated[monsterId] = {
+                  kills: existing.kills + stats.kills,
+                  loot: {
+                    ...existing.loot,
+                    ...Object.entries(stats.loot || {}).reduce((acc, [k, v]) => {
+                      acc[k] = (existing.loot?.[k] || 0) + v;
+                      return acc;
+                    }, {})
+                  },
+                  timeMs: existing.timeMs + stats.timeMs
+                };
+              });
+              return updated;
+            });
+          }
           if (setOfflineProgress) setOfflineProgress(offlineData);
         }
       } else if (parsed.lastSaveTimestamp && !parsed.activeAction) {

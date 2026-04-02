@@ -387,6 +387,11 @@ export default function useCombatEngine() {
         if (allAlliesDead && localAllies.length > 0) {
           callbacksRef.current.onPlayerDead?.();
         }
+
+        // Step 11: Fire onTick callback (for auto-eat etc.)
+        if (!allAlliesDead) {
+          callbacksRef.current.onTick?.(localAllies, localEnemies, tickNumberRef.current);
+        }
       }
     } catch (err) {
       console.error('[useCombatEngine] runTick error:', err);

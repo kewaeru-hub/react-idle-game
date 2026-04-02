@@ -68,5 +68,16 @@ export function useShop(setInventory, inventory) {
     }
   };
 
-  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade };
+  // Functie 6: Auto Eat upgrade kopen
+  const buyAutoEat = (cost) => {
+    if ((inventory.coins || 0) >= cost) {
+      setInventory(prev => ({
+        ...prev,
+        coins: prev.coins - cost,
+        autoEatUpgrade: 1
+      }));
+    }
+  };
+
+  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat };
 }

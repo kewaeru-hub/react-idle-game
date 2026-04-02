@@ -71,8 +71,11 @@ export default function WelcomeBackModal({ offlineProgress, onClose }) {
           <h3 style={{ color: '#f1c40f', marginTop: 0, marginBottom: '10px' }}>📊 Offline Progress</h3>
           
           <div style={{ color: '#c5d3df', fontSize: '14px', lineHeight: '1.8', marginBottom: '10px' }}>
-            <div>✓ <strong>{offlineProgress.totalActions}x</strong> {offlineProgress.actionName} completed</div>
+            <div>✓ <strong>{offlineProgress.totalActions}x</strong> {offlineProgress.actionName} {offlineProgress.isCombat ? 'killed' : 'completed'}</div>
             <div>✓ <strong style={{ color: '#2ecc71' }}>+{Math.floor(offlineProgress.totalXp)} {formatSkillName(offlineProgress.skill)}</strong> XP gained</div>
+            {offlineProgress.isCombat && offlineProgress.hpXp > 0 && (
+              <div>✓ <strong style={{ color: '#2ecc71' }}>+{Math.floor(offlineProgress.hpXp)} Hitpoints</strong> XP gained</div>
+            )}
           </div>
 
           {Object.keys(offlineProgress.itemsGained).length > 0 && (
@@ -91,6 +94,25 @@ export default function WelcomeBackModal({ offlineProgress, onClose }) {
           {offlineProgress.resourcesDepleted && (
             <div style={{ marginTop: '12px', padding: '10px', backgroundColor: 'rgba(220, 53, 69, 0.2)', borderRadius: '4px', borderLeft: '3px solid #dc3545', fontSize: '13px', color: '#ff6b6b' }}>
               ⚠️ Stopped early: ran out of resources
+            </div>
+          )}
+
+          {offlineProgress.isCombat && offlineProgress.foodConsumed && Object.keys(offlineProgress.foodConsumed).length > 0 && (
+            <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #2a3b4c' }}>
+              <h4 style={{ color: '#e67e22', marginTop: 0, marginBottom: '8px' }}>🍖 Food Consumed:</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {Object.entries(offlineProgress.foodConsumed).map(([itemId, qty]) => (
+                  <div key={itemId} style={{ fontSize: '13px', color: '#c5d3df' }}>
+                    {qty}x {getItemName(itemId)}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {offlineProgress.died && (
+            <div style={{ marginTop: '12px', padding: '10px', backgroundColor: 'rgba(220, 53, 69, 0.2)', borderRadius: '4px', borderLeft: '3px solid #dc3545', fontSize: '13px', color: '#ff6b6b' }}>
+              💀 You died during offline combat! Progress was saved up to your last kill.
             </div>
           )}
 

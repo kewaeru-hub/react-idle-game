@@ -1,4 +1,5 @@
 import { getSkillingSpeedMultiplier, getActivePet } from './gameHelpers';
+import { FOOD_HEALS } from '../data/gameData';
 
 /**
  * Berekent en simuleert offline progressie
@@ -42,7 +43,9 @@ export function calculateOfflineProgress(
   // 3. Als geen actie of combat → geen progressie
   if (!activeAction || !ACTIONS[activeAction]) return null;
   const actionData = ACTIONS[activeAction];
-  if (actionData.skill === 'combat') return null;
+  if (actionData.skill === 'combat') {
+    return calculateOfflineCombat(cappedMs, activeAction, actionData, skills, equipment, inventory, WEAPONS, ARMOR, AMMO, PETS, ITEMS);
+  }
   // Skip thieving for offline simulation — thieving uses its own target loop
   // and the placeholder `thieving` action may lack `reward`/`cost` fields.
   if (actionData.skill === 'thieving') return null;
@@ -274,5 +277,286 @@ export function calculateOfflineProgress(
     petName,
     petPerk,
     petProcs
+  };
+}
+
+/**
+ * Statistical offline combat progression.
+ * Simulates combat tick-by-tick using OSRS-style formulas.
+ * If auto-eat is active, automatically eats food each tick when HP is low.
+ * Stops if: player dies, time runs out, or food runs out (with auto-eat).
+ */
+function calculateOfflineCombat(
+  cappedMs, activeAction, actionData, skills, equipment, inventory,
+  WEAPONS, ARMOR, AMMO, PETS, ITEMS
+) {
+  const enemy = actionData.enemy;
+  if (!enemy) return null;
+
+  // --- Player stats ---
+  const weapon = equipment?.weapon ? (WEAPONS[equipment.weapon] || {}) : {};
+  const armorSlots = ['head', 'body', 'legs', 'shield'];
+  let armorAccuracy = 0, armorRangedAcc = 0, armorMagicAcc = 0;
+  let armorDefence = 0, armorRangedDef = 0, armorMagicDef = 0;
+  armorSlots.forEach(slot => {
+    const armorId = equipment?.[slot];
+    const armor = armorId ? (ARMOR[armorId] || null) : null;
+    if (armor) {
+      armorAccuracy += armor.accuracy || 0;
+      armorRangedAcc += armor.rangedAcc || 0;
+      armorMagicAcc += armor.magicAcc || 0;
+      armorDefence += armor.defence || 0;
+      armorRangedDef += armor.rangedDef || 0;
+      armorMagicDef += armor.magicDef || 0;
+    }
+  });
+
+  const ammoId = equipment?.ammo;
+  const ammoRangedStr = ammoId ? (AMMO[ammoId]?.rangedStr || 0) : 0;
+
+  // Determine combat style from weapon type
+  let combatStyle = 'attack';
+  if (weapon.type === 'ranged') combatStyle = 'ranged';
+  else if (weapon.type === 'magic') combatStyle = 'magic';
+
+  const maxHp = skills.hitpoints?.level || 10;
+  const attackLevel = skills.attack?.level || 1;
+  const strengthLevel = skills.strength?.level || 1;
+  const defenceLevel = skills.defence?.level || 1;
+  const rangedLevel = skills.ranged?.level || 1;
+  const magicLevel = skills.magic?.level || 1;
+  const agilityLevel = skills.agility?.level || 1;
+  const dodgeChance = agilityLevel * 0.002;
+
+  // --- Enemy stats ---
+  const enemyHp = enemy.hp || 1;
+  const enemyStr = enemy.str || 1;
+  const enemySpeed = enemy.speedTicks || 4;
+  const enemyType = enemy.type || 'melee';
+  const enemyOffAtt = enemy.offAtt || { melee: enemy.att || 1, ranged: 0, magic: 0 };
+  const enemyDefBonus = enemy.defBonus || { melee: enemy.def || 0, ranged: enemy.def || 0, magic: enemy.def || 0 };
+  const playerSpeed = weapon.speedTicks || 4;
+
+  // --- Hit chance calculation (OSRS-style) ---
+  function calcHitChance(attackRoll, defenceRoll) {
+    let hc;
+    if (attackRoll > defenceRoll) {
+      hc = 1 - (defenceRoll + 2) / (2 * (attackRoll + 1));
+    } else {
+      hc = attackRoll / (2 * (defenceRoll + 1));
+    }
+    return Math.min(0.95, Math.max(0.05, hc));
+  }
+
+  // Player attack roll
+  let playerAccLevel, playerEquipAttBonus;
+  if (combatStyle === 'ranged') {
+    playerAccLevel = rangedLevel;
+    playerEquipAttBonus = (weapon.att || 0) + armorRangedAcc;
+  } else if (combatStyle === 'magic') {
+    playerAccLevel = magicLevel;
+    playerEquipAttBonus = (weapon.att || 0) + armorMagicAcc;
+  } else {
+    playerAccLevel = attackLevel;
+    playerEquipAttBonus = (weapon.att || 0) + armorAccuracy;
+  }
+  const playerAttackRoll = (playerAccLevel + 8) * (Math.max(0, playerEquipAttBonus) + 64);
+
+  // Monster defence roll against player
+  let monsterDefBonus;
+  if (combatStyle === 'ranged') monsterDefBonus = enemyDefBonus.ranged || 0;
+  else if (combatStyle === 'magic') monsterDefBonus = enemyDefBonus.magic || 0;
+  else monsterDefBonus = enemyDefBonus.melee || 0;
+  const monsterDefenceRoll = (monsterDefBonus + 9) * 64;
+
+  const playerHitChance = calcHitChance(playerAttackRoll, monsterDefenceRoll);
+
+  // Player max hit
+  let playerStrLevel, playerStrBonus;
+  if (combatStyle === 'ranged') {
+    playerStrLevel = rangedLevel;
+    playerStrBonus = ammoRangedStr;
+  } else if (combatStyle === 'magic') {
+    playerStrLevel = magicLevel;
+    playerStrBonus = weapon.str || 0;
+  } else {
+    playerStrLevel = strengthLevel;
+    playerStrBonus = weapon.str || 0;
+  }
+  const playerMaxHit = Math.max(1, Math.floor(0.5 + (playerStrLevel + 8) * (playerStrBonus + 64) / 640));
+
+  // Monster attack roll against player
+  let monsterAttBonus;
+  if (enemyType === 'ranged' || enemyType === 'range') monsterAttBonus = enemyOffAtt.ranged || 0;
+  else if (enemyType === 'magic') monsterAttBonus = enemyOffAtt.magic || 0;
+  else monsterAttBonus = enemyOffAtt.melee || 0;
+  const monsterAttackRoll = (monsterAttBonus + 9) * 64;
+
+  // Player defence roll
+  const effectiveDefLevel = defenceLevel + 8;
+  let playerEquipDefBonus;
+  if (enemyType === 'ranged' || enemyType === 'range') playerEquipDefBonus = armorRangedDef;
+  else if (enemyType === 'magic') playerEquipDefBonus = armorMagicDef;
+  else playerEquipDefBonus = armorDefence;
+  const playerDefenceRoll = effectiveDefLevel * (Math.max(0, playerEquipDefBonus) + 64);
+
+  const monsterHitChance = calcHitChance(monsterAttackRoll, playerDefenceRoll);
+  const monsterMaxHit = Math.max(1, Math.floor(0.5 + (enemyStr + 8) * 64 / 640));
+
+  // --- Auto-eat config ---
+  const hasAutoEat = !!(inventory.autoEatUpgrade);
+  const eatThreshold = hasAutoEat ? (inventory.autoEatThreshold || 50) : 0;
+  const RESPAWN_TICKS = 4;
+  const TICK_MS = 600;
+
+  // Build food list from inventory (ordered by inventoryOrder if possible, else by key)
+  let simulatedInventory = { ...inventory };
+  let foodList = []; // [{key, heal}]
+  const rebuildFoodList = () => {
+    foodList = [];
+    for (const key of Object.keys(simulatedInventory)) {
+      if ((simulatedInventory[key] || 0) > 0 && FOOD_HEALS[key]) {
+        foodList.push({ key, heal: FOOD_HEALS[key] });
+      }
+    }
+  };
+  rebuildFoodList();
+
+  // --- Tick-by-tick simulation ---
+  const totalTicks = Math.floor(cappedMs / TICK_MS);
+  let playerHp = maxHp;
+  let currentEnemyHp = enemyHp;
+  let playerTickCount = 0;
+  let enemyTickCount = 0;
+  let respawnTicks = 0;
+  let totalKills = 0;
+  let totalXp = 0;
+  let died = false;
+  let itemsGained = {};
+  let foodConsumed = {};
+  let ateThisTick = false;
+
+  for (let tick = 0; tick < totalTicks; tick++) {
+    ateThisTick = false;
+
+    // Handle respawn
+    if (respawnTicks > 0) {
+      respawnTicks--;
+      if (respawnTicks <= 0) {
+        currentEnemyHp = enemyHp;
+        playerTickCount = 0;
+        enemyTickCount = 0;
+      }
+      continue;
+    }
+
+    // Increment tick counters
+    playerTickCount++;
+    enemyTickCount++;
+
+    // Player attacks
+    if (playerTickCount >= playerSpeed) {
+      playerTickCount = 0;
+      if (currentEnemyHp > 0 && Math.random() < playerHitChance) {
+        // Dodge doesn't apply to player attacks
+        const dmg = Math.floor(Math.random() * playerMaxHit) + 1;
+        const actual = Math.min(dmg, currentEnemyHp);
+        currentEnemyHp -= actual;
+
+        // XP: combat style + hitpoints
+        totalXp += actual * 4; // combat style xp
+        // (hitpoints xp is actual * 1.33 but we track main skill only)
+      }
+    }
+
+    // Enemy attacks
+    if (currentEnemyHp > 0 && enemyTickCount >= enemySpeed) {
+      enemyTickCount = 0;
+      if (Math.random() < monsterHitChance) {
+        // Dodge check
+        if (!(dodgeChance > 0 && Math.random() < dodgeChance)) {
+          const dmg = Math.floor(Math.random() * monsterMaxHit) + 1;
+          playerHp = Math.max(0, playerHp - dmg);
+        }
+      }
+    }
+
+    // Auto-eat after enemy attacks
+    if (hasAutoEat && eatThreshold > 0 && playerHp > 0 && playerHp < maxHp) {
+      const hpPercent = (playerHp / maxHp) * 100;
+      if (hpPercent < eatThreshold && !ateThisTick) {
+        // Find first food
+        let ate = false;
+        for (const food of foodList) {
+          if ((simulatedInventory[food.key] || 0) > 0) {
+            simulatedInventory[food.key]--;
+            if (simulatedInventory[food.key] <= 0) delete simulatedInventory[food.key];
+            playerHp = Math.min(maxHp, playerHp + food.heal);
+            foodConsumed[food.key] = (foodConsumed[food.key] || 0) + 1;
+            ate = true;
+            ateThisTick = true;
+            break;
+          }
+        }
+        if (!ate) {
+          // No food left — rebuild and check
+          rebuildFoodList();
+          if (foodList.length === 0) {
+            // No food at all, continue without eating
+          }
+        }
+      }
+    }
+
+    // Check player death
+    if (playerHp <= 0) {
+      died = true;
+      break;
+    }
+
+    // Check enemy death
+    if (currentEnemyHp <= 0) {
+      totalKills++;
+      // Award loot
+      if (actionData.reward) {
+        Object.entries(actionData.reward).forEach(([k, v]) => {
+          simulatedInventory[k] = (simulatedInventory[k] || 0) + v;
+          itemsGained[k] = (itemsGained[k] || 0) + v;
+        });
+      }
+      // Start respawn
+      respawnTicks = RESPAWN_TICKS;
+      rebuildFoodList();
+    }
+  }
+
+  if (totalKills === 0) return null;
+
+  // Calculate total combat XP (main style xp + hitpoints xp)
+  const hpXp = Math.floor(totalXp * 1.33 / 4); // hitpoints gets 1.33 per damage
+
+  return {
+    totalActions: totalKills,
+    totalXp,
+    hpXp,
+    skill: combatStyle === 'ranged' ? 'ranged' : combatStyle === 'magic' ? 'magic' : combatStyle,
+    actionName: actionData.name,
+    itemsGained,
+    foodConsumed,
+    newInventory: simulatedInventory,
+    offlineMinutes: Math.floor(cappedMs / 60000),
+    offlineHours: Math.floor(cappedMs / 3600000),
+    died,
+    isCombat: true,
+    monsterStatsUpdate: {
+      [activeAction]: {
+        kills: totalKills,
+        loot: itemsGained,
+        timeMs: cappedMs
+      }
+    },
+    petName: null,
+    petPerk: null,
+    petProcs: 0
   };
 }

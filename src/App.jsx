@@ -52,9 +52,21 @@ export default function App({ user, signOut }) {
   const [combatStyle, setCombatStyle] = useState('attack');
   const [inventory, setInventory] = useState({ coins: 0, bones: 0, raw_shrimp: 0, cooked_shrimp: 5, prayer_potion: 5, bronze_bow: 1, bronze_scimitar: 1, bronze_staff: 1, maxSlots: 35, offlineHoursUpgrade: 0, woodcutting_pet: 1, fishing_pet: 1, mining_pet: 1, foraging_pet: 1, cooking_pet: 1, smithing_pet: 1, crafting_pet: 1, herblore_pet: 1, thieving_pet: 1, farming_pet: 1, agility_pet: 1, slayer_pet: 1 });
   const [offlineProgress, setOfflineProgress] = useState(null);
+  const [autoEatThreshold, setAutoEatThreshold] = useState(50);
+  const [showCombatPopup, setShowCombatPopup] = useState(false);
+  const [pendingCombatId, setPendingCombatId] = useState(null);
+
+  // Sync autoEatThreshold from inventory on load
+  useEffect(() => {
+    if (inventory.autoEatThreshold != null) {
+      setAutoEatThreshold(inventory.autoEatThreshold);
+    }
+  }, []);
 
   // Refs
   const inventoryRef = useRef(inventory);
+  const autoEatThresholdRef = useRef(autoEatThreshold);
+  useEffect(() => { autoEatThresholdRef.current = autoEatThreshold; }, [autoEatThreshold]);
 
   const { equipment, setEquipment, equipmentAmounts, setEquipmentAmounts, toggleEquip } = useEquipment(
     { weapon: null }, { ammo: 0 }, inventoryRef, setInventory, setCombatStyle
@@ -85,7 +97,7 @@ export default function App({ user, signOut }) {
 
   // Sync inventoryOrder: remove items that no longer exist, append new items at end
   useEffect(() => {
-    const exclude = new Set(['coins', 'maxSlots', 'slayer_points', 'offlineHoursUpgrade']);
+    const exclude = new Set(['coins', 'maxSlots', 'slayer_points', 'offlineHoursUpgrade', 'autoEatUpgrade', 'autoEatThreshold', 'autoToolboxUpgrade']);
     const activeItems = Object.keys(inventory).filter(k => !exclude.has(k) && inventory[k] > 0);
     const activeSet = new Set(activeItems);
     setInventoryOrder(prev => {
@@ -546,7 +558,8 @@ export default function App({ user, signOut }) {
 
   const combat = useCombat(
     activeAction, ACTIONS, skills, { maxHp, maxPrayer }, 
-    combatStyle, setInventory, addXp, triggerXpDrop, stopAction, getCurrentWeapon, slayerTask, equipment
+    combatStyle, setInventory, addXp, triggerXpDrop, stopAction, getCurrentWeapon, slayerTask, equipment,
+    autoEatThresholdRef, inventoryRef, inventoryOrderRef
   );
 
   useEffect(() => { combatRef.current = combat; }, [combat]);
@@ -559,6 +572,16 @@ export default function App({ user, signOut }) {
   const combatStartTime = useRef(null);
 
   const startCombat = (id) => {
+    // If auto-eat is unlocked and not lava cave, show popup for threshold
+    if (inventory.autoEatUpgrade && id !== 'lava_cave') {
+      setPendingCombatId(id);
+      setShowCombatPopup(true);
+      return;
+    }
+    actuallyStartCombat(id);
+  };
+
+  const actuallyStartCombat = (id) => {
     console.log('[App] startCombat', id);
     setActiveAction(id);
     setProgress(0);
@@ -624,7 +647,7 @@ export default function App({ user, signOut }) {
       if (!enemies.some(e => e.hp > 0)) {
         hasResumedCombat.current = true;
         console.log('[App] Auto-resuming lava cave');
-        startCombat('lava_cave');
+        actuallyStartCombat('lava_cave');
       }
       return;
     }
@@ -636,7 +659,7 @@ export default function App({ user, signOut }) {
     if (!hasAliveEnemies) {
       hasResumedCombat.current = true;
       console.log('[App] Auto-resuming combat for', activeAction);
-      startCombat(activeAction);
+      actuallyStartCombat(activeAction);
     }
   }, [activeAction]);
 
@@ -711,7 +734,7 @@ export default function App({ user, signOut }) {
   useEffect(() => { slayerRef.current = { currentTask: slayer.currentTask, slayerPoints: slayer.slayerPoints, consecutive: slayer.consecutive }; }, [slayer.currentTask, slayer.slayerPoints, slayer.consecutive]);
 
   // Shop functions
-  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade } = useShop(setInventory, inventory);
+  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat } = useShop(setInventory, inventory);
 
   // Clan system
   const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment } = useClan();
@@ -754,7 +777,7 @@ export default function App({ user, signOut }) {
         <main className="content-area">
           {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} claimAllTools={claimAllTools} claimedTools={claimedTools} TOOL_SKILLS={TOOL_SKILLS} monsterStats={monsterStats} ACTIONS={ACTIONS} ITEM_IMAGES={ITEM_IMAGES} />}
           {screen === 'inventory' && <InventoryView inventory={inventory} ARMOR={ARMOR} equipment={equipment} equipmentAmounts={equipmentAmounts} WEAPONS={WEAPONS} AMMO={AMMO} toggleEquip={toggleEquip} combatStyle={combatStyle} setCombatStyle={setCombatStyle} sellItemToShop={sellItemToShop} setActivePopup={setActivePopup} depositToVault={depositToVault} clan={clan} setInventory={setInventory} inventoryOrder={inventoryOrder} setInventoryOrder={setInventoryOrder} />}
-          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} />}
+          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} buyAutoEat={buyAutoEat} />}
           {screen === 'clan' && (
             <ClanView 
               clan={clan} clanScreen={clanScreen} setClanScreen={setClanScreen}
@@ -975,6 +998,58 @@ export default function App({ user, signOut }) {
                 prayers={combat.prayers} combatStyle={combatStyle} getCurrentWeapon={getCurrentWeapon} 
               />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Auto-Eat Combat Start Popup */}
+      {showCombatPopup && pendingCombatId && (
+        <div className="popup-overlay" onClick={() => { setShowCombatPopup(false); setPendingCombatId(null); }}>
+          <div className="popup-box" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px', padding: '25px', textAlign: 'center' }}>
+            <h2 style={{ color: '#4affd4', marginBottom: '15px' }}>⚔️ Combat Settings</h2>
+            <p style={{ color: '#c5d3df', fontSize: '14px', marginBottom: '20px' }}>
+              Fighting: <strong style={{ color: 'white', textTransform: 'capitalize' }}>{ACTIONS[pendingCombatId]?.name || pendingCombatId.replace('fight_', '').replace(/_/g, ' ')}</strong>
+            </p>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ color: '#4affd4', fontWeight: 'bold', display: 'block', marginBottom: '10px' }}>
+                🍖 Auto Eat Threshold: {autoEatThreshold}% HP
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={autoEatThreshold}
+                onChange={e => setAutoEatThreshold(parseInt(e.target.value))}
+                style={{ width: '100%', accentColor: '#4affd4', cursor: 'pointer' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#7b95a6', marginTop: '5px' }}>
+                <span>Off (0%)</span>
+                <span>100%</span>
+              </div>
+              <p style={{ fontSize: '12px', color: '#7b95a6', marginTop: '8px' }}>
+                {autoEatThreshold === 0
+                  ? 'Auto eat is disabled — you must eat manually.'
+                  : `Auto eats food when HP drops below ${autoEatThreshold}%.`}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={() => { setShowCombatPopup(false); setPendingCombatId(null); }}
+                style={{ padding: '10px 25px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              >Cancel</button>
+              <button
+                onClick={() => {
+                  setShowCombatPopup(false);
+                  const id = pendingCombatId;
+                  setPendingCombatId(null);
+                  // Persist threshold in inventory for save/load
+                  setInventory(prev => ({ ...prev, autoEatThreshold }));
+                  actuallyStartCombat(id);
+                }}
+                style={{ padding: '10px 25px', background: '#2ecc71', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+              >Start Fight!</button>
+            </div>
           </div>
         </div>
       )}

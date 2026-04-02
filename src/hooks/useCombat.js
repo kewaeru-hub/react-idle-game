@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import useCombatEngine from './useCombatEngine';
 import { getActivePet } from '../utils/gameHelpers';
-import { PRAYER_BOOK, ARMOR, AMMO } from '../data/gameData';
+import { PRAYER_BOOK, ARMOR, AMMO, FOOD_HEALS } from '../data/gameData';
 
 export function useCombat(
   activeAction,
@@ -17,7 +17,10 @@ export function useCombat(
   stopAction,
   getCurrentWeapon,
   slayerTask,
-  equipment
+  equipment,
+  autoEatThresholdRef,
+  inventoryRef,
+  inventoryOrderRef
 ) {
   // === Initialize engine (no params) ===
   const engine = useCombatEngine();
@@ -29,6 +32,23 @@ export function useCombat(
     // Update the engine entity so OSRS accuracy/max hit uses the correct style
     engine.updateAlly('player', { combatStyle });
   }, [combatStyle]);
+
+  // Update player stats when skills or playerStats change (during combat)
+  useEffect(() => {
+    const currentAllies = engine.getAllies ? engine.getAllies() : engine.allies;
+    const currentPlayer = currentAllies?.find(a => a.id === 'player');
+    if (!currentPlayer) return; // Combat not active
+
+    // Update maxHp and skill levels when they change
+    engine.updateAlly('player', {
+      maxHp: playerStats?.maxHp || 10,
+      attackLevel: skills.attack?.level || 1,
+      strengthLevel: skills.strength?.level || 1,
+      defenceLevel: skills.defence?.level || 1,
+      rangedLevel: skills.ranged?.level || 1,
+      magicLevel: skills.magic?.level || 1
+    });
+  }, [skills, playerStats, engine]);
 
   // === Combat Log ===
   const combatLogRef = useRef([]);
@@ -207,6 +227,37 @@ export function useCombat(
         stopAction && stopAction();
         // Call app-provided callback if exists (handles respawn for regular combat)
         if (appCallbacks?.onPlayerDead) appCallbacks.onPlayerDead();
+      },
+      onTick: (allies) => {
+        // Auto-eat logic: eat food when HP below threshold
+        // NOTE: We bypass eatFood() here because engine.tickNumber (React snapshot)
+        // is stale inside this callback, causing the tick-dedup to block all eats.
+        // onTick fires exactly once per tick, so no dedup needed.
+        const threshold = autoEatThresholdRef?.current || 0;
+        if (threshold <= 0) return;
+        const inv = inventoryRef?.current;
+        if (!inv || !inv.autoEatUpgrade) return;
+        const player = allies.find(a => a.id === 'player');
+        if (!player || player.hp <= 0 || player.hp >= player.maxHp) return;
+        const hpPercent = (player.hp / player.maxHp) * 100;
+        if (hpPercent >= threshold) return;
+        // Find first food in inventory order
+        const order = inventoryOrderRef?.current || Object.keys(inv);
+        for (const itemKey of order) {
+          if (!itemKey || (inv[itemKey] || 0) < 1) continue;
+          const heal = FOOD_HEALS[itemKey];
+          if (!heal) continue;
+          // Directly deduct from inventory and queue EAT
+          setInventory(prev => {
+            if ((prev[itemKey] || 0) < 1) return prev;
+            const n = { ...prev };
+            n[itemKey] = (n[itemKey] || 0) - 1;
+            if (n[itemKey] <= 0) delete n[itemKey];
+            return n;
+          });
+          engine.queueAction({ type: 'EAT', heal, targetId: 'player' });
+          break;
+        }
       }
     };
 
