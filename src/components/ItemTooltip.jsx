@@ -18,9 +18,8 @@ export default function ItemTooltip({ itemKey, count, getItemData, children }) {
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const ref = useRef(null);
   const tooltipRef = useRef(null);
+  const longPressTimer = useRef(null);
 
-  const isTouchDevice = typeof window !== 'undefined' && 'ontouchstart' in window;
-  if (isTouchDevice) return children;
   if (!itemKey) return children;
 
   const handleMouseEnter = (e) => {
@@ -33,23 +32,15 @@ export default function ItemTooltip({ itemKey, count, getItemData, children }) {
   };
 
   const updatePosition = (e) => {
-    // Measure actual tooltip size if rendered, otherwise estimate
     const rect = tooltipRef.current?.getBoundingClientRect();
     const tw = rect ? rect.width : 260;
     const th = rect ? rect.height : 180;
-
-    const gap = 10; // pixels tussen cursor en tooltip
+    const gap = 10;
     const cx = e.clientX;
     const cy = e.clientY;
     const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-
-    // Horizontaal: tooltip gecentreerd op muispositie
     let x = cx - tw / 2;
-    // Verticaal: tooltip boven de muis, met kleine gap
     let y = cy - th - gap;
-    // Clamp aan schermranden
     if (x < 5) x = 5;
     if (x + tw > vw - 5) x = vw - tw - 5;
     if (y < 5) y = 5;
@@ -57,6 +48,42 @@ export default function ItemTooltip({ itemKey, count, getItemData, children }) {
   };
 
   const handleMouseLeave = () => setShow(false);
+
+  // --- Touch support (long-press) ---
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    longPressTimer.current = setTimeout(() => {
+      const rect = tooltipRef.current?.getBoundingClientRect();
+      const tw = rect ? rect.width : 260;
+      const th = rect ? rect.height : 180;
+      const gap = 10;
+      const cx = touch.clientX;
+      const cy = touch.clientY;
+      const vw = window.innerWidth;
+      let x = cx - tw / 2;
+      let y = cy - th - gap;
+      if (x < 5) x = 5;
+      if (x + tw > vw - 5) x = vw - tw - 5;
+      if (y < 5) y = cy + 20;
+      setPos({ x, y });
+      setShow(true);
+    }, 400);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    setTimeout(() => setShow(false), 1500);
+  };
+
+  const handleTouchMove = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
 
   const data = getItemData ? getItemData(itemKey) : builtInLookup(itemKey);
   if (!data) return children;
@@ -84,6 +111,9 @@ export default function ItemTooltip({ itemKey, count, getItemData, children }) {
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
       style={{ display: 'contents' }}
     >
       {children}

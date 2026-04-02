@@ -50,7 +50,7 @@ export default function App({ user, signOut }) {
   const [activeAction, setActiveAction] = useState(null);
   const [progress, setProgress] = useState(0); 
   const [combatStyle, setCombatStyle] = useState('attack');
-  const [inventory, setInventory] = useState({ coins: 0, bones: 0, raw_shrimp: 0, cooked_shrimp: 5, prayer_potion: 5, shortbow: 1, wooden_staff: 1, bronze_bow: 1, bronze_scimitar: 1, bronze_staff: 1, maxSlots: 35, offlineHoursUpgrade: 0, woodcutting_pet: 1, fishing_pet: 1, mining_pet: 1, foraging_pet: 1, cooking_pet: 1, smithing_pet: 1, crafting_pet: 1, herblore_pet: 1, thieving_pet: 1, farming_pet: 1, agility_pet: 1, slayer_pet: 1 });
+  const [inventory, setInventory] = useState({ coins: 0, bones: 0, raw_shrimp: 0, cooked_shrimp: 5, prayer_potion: 5, bronze_bow: 1, bronze_scimitar: 1, bronze_staff: 1, maxSlots: 35, offlineHoursUpgrade: 0, woodcutting_pet: 1, fishing_pet: 1, mining_pet: 1, foraging_pet: 1, cooking_pet: 1, smithing_pet: 1, crafting_pet: 1, herblore_pet: 1, thieving_pet: 1, farming_pet: 1, agility_pet: 1, slayer_pet: 1 });
   const [offlineProgress, setOfflineProgress] = useState(null);
 
   // Refs
@@ -70,15 +70,18 @@ export default function App({ user, signOut }) {
   const [claimedTools, setClaimedTools] = useState({});
   const [toolboxes, setToolboxes] = useState({});
   const [inventoryOrder, setInventoryOrder] = useState([]);
+  const [monsterStats, setMonsterStats] = useState({});
 
   // Refs
   const combatRef = useRef(null);
   const playerPrayerRef = useRef(playerPrayer);
   const inventoryOrderRef = useRef(inventoryOrder);
+  const monsterStatsRef = useRef(monsterStats);
 
   useEffect(() => { inventoryRef.current = inventory; }, [inventory]);
   useEffect(() => { playerPrayerRef.current = playerPrayer; }, [playerPrayer]);
   useEffect(() => { inventoryOrderRef.current = inventoryOrder; }, [inventoryOrder]);
+  useEffect(() => { monsterStatsRef.current = monsterStats; }, [monsterStats]);
 
   // Sync inventoryOrder: remove items that no longer exist, append new items at end
   useEffect(() => {
@@ -136,8 +139,8 @@ export default function App({ user, signOut }) {
   const claimToolCallback = (skill) => {
     if (!TOOL_SKILLS[skill]) return;
 
-    const ironToolTier = 1; // iron = index 1
-    const toolId = TOOL_SKILLS[skill].tiers[ironToolTier];
+    const bronzeToolTier = 0; // bronze = index 0
+    const toolId = TOOL_SKILLS[skill].tiers[bronzeToolTier];
 
     // Mark as claimed
     setClaimedTools(prev => ({
@@ -145,14 +148,30 @@ export default function App({ user, signOut }) {
       [skill]: true
     }));
 
-    // Initialize toolbox for this skill with the iron tool auto-stored (NOT in inventory)
+    // Initialize toolbox for this skill with the bronze tool auto-stored (NOT in inventory)
     setToolboxes(prev => ({
       ...prev,
       [skill]: {
         level: 0,
-        slots: [toolId]  // Iron tool auto-stored in first slot
+        slots: [toolId]  // Bronze tool auto-stored in first slot
       }
     }));
+  };
+
+  const claimAllTools = () => {
+    const newClaimedTools = {};
+    const newToolboxes = {};
+    Object.entries(TOOL_SKILLS).forEach(([skill, data]) => {
+      if (!claimedTools[skill]) {
+        newClaimedTools[skill] = true;
+        newToolboxes[skill] = {
+          level: 0,
+          slots: [data.tiers[0]]  // Bronze tool in first slot
+        };
+      }
+    });
+    setClaimedTools(prev => ({ ...prev, ...newClaimedTools }));
+    setToolboxes(prev => ({ ...prev, ...newToolboxes }));
   };
 
   const upgradeToolbox = (skill) => {
@@ -537,12 +556,15 @@ export default function App({ user, signOut }) {
     combat, setInventory, stopAction, setPlayerPrayer, playerPrayer, maxPrayer
   );
 
+  const combatStartTime = useRef(null);
+
   const startCombat = (id) => {
     console.log('[App] startCombat', id);
     setActiveAction(id);
     setProgress(0);
     resetSession();
     combat.clearCombatLog();
+    combatStartTime.current = Date.now();
 
     if (id === 'lava_cave') {
       startFightCave();
@@ -559,6 +581,27 @@ export default function App({ user, signOut }) {
         },
         onAllEnemiesDead: () => {
           slayer.recordKill(id);
+          // Track monster stats: kills, loot, time
+          const actionData = ACTIONS[id];
+          const killTimeMs = combatStartTime.current ? Date.now() - combatStartTime.current : 0;
+          combatStartTime.current = Date.now(); // reset for next kill
+          setMonsterStats(prev => {
+            const existing = prev[id] || { kills: 0, loot: {}, timeMs: 0 };
+            const newLoot = { ...existing.loot };
+            if (actionData && actionData.reward) {
+              Object.entries(actionData.reward).forEach(([k, v]) => {
+                newLoot[k] = (newLoot[k] || 0) + v;
+              });
+            }
+            return {
+              ...prev,
+              [id]: {
+                kills: existing.kills + 1,
+                loot: newLoot,
+                timeMs: existing.timeMs + killTimeMs
+              }
+            };
+          });
         }
       };
       
@@ -610,22 +653,45 @@ export default function App({ user, signOut }) {
     if (!activeAction || !ACTIONS[activeAction] || ACTIONS[activeAction].skill !== 'combat') return;
     if (!combat?.engine?.updateAlly) return;
     const weapon = getCurrentWeapon();
+    // Recalculate armor bonuses
+    const armorSlots = ['head', 'body', 'legs', 'shield'];
+    let armorAccuracy = 0, armorRangedAcc = 0, armorMagicAcc = 0;
+    let armorDefence = 0, armorRangedDef = 0, armorMagicDef = 0;
+    armorSlots.forEach(slot => {
+      const armorId = equipment?.[slot];
+      const armor = armorId ? ARMOR[armorId] : null;
+      if (armor) {
+        armorAccuracy += armor.accuracy || 0;
+        armorRangedAcc += armor.rangedAcc || 0;
+        armorMagicAcc += armor.magicAcc || 0;
+        armorDefence += armor.defence || 0;
+        armorRangedDef += armor.rangedDef || 0;
+        armorMagicDef += armor.magicDef || 0;
+      }
+    });
+    const ammoId = equipment?.ammo;
+    const ammoRangedStr = ammoId ? (AMMO[ammoId]?.rangedStr || 0) : 0;
     combat.engine.updateAlly('player', {
       attackSpeedTicks: weapon.speedTicks || 4,
       weaponAtt: weapon.att || 0,
-      weaponStr: weapon.str || 0
+      weaponStr: weapon.str || 0,
+      ammoRangedStr,
+      armorAccuracy, armorRangedAcc, armorMagicAcc,
+      armorDefence, armorRangedDef, armorMagicDef
     });
-  }, [equipment.weapon]);
+  }, [equipment.weapon, equipment.head, equipment.body, equipment.legs, equipment.shield, equipment.ammo]);
 
   // Update engine when combat style changes during combat (don't reset attack tick)
   useEffect(() => {
     if (!activeAction || !ACTIONS[activeAction] || ACTIONS[activeAction].skill !== 'combat') return;
     if (!combat?.engine?.updateAlly) return;
-    const accLevel = combatStyle === 'ranged' ? (skills.ranged?.level || 1) : combatStyle === 'magic' ? (skills.magic?.level || 1) : (skills.attack?.level || 1);
-    const strLevel = combatStyle === 'ranged' ? (skills.ranged?.level || 1) : combatStyle === 'magic' ? (skills.magic?.level || 1) : (skills.strength?.level || 1);
     combat.engine.updateAlly('player', {
-      att: accLevel,
-      str: strLevel
+      combatStyle,
+      attackLevel: skills.attack?.level || 1,
+      strengthLevel: skills.strength?.level || 1,
+      defenceLevel: skills.defence?.level || 1,
+      rangedLevel: skills.ranged?.level || 1,
+      magicLevel: skills.magic?.level || 1
     });
   }, [combatStyle]);
 
@@ -662,7 +728,7 @@ export default function App({ user, signOut }) {
   useEffect(() => { marketRef.current = { marketOffers, marketSlots, orderHistory }; }, [marketOffers, marketSlots, orderHistory]);
 
   // Save/Load system (Cloud + Local hybrid)
-  const { hardResetGame } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, slayerRef, slayer.setCurrentTask, slayer.setSlayerPoints, slayer.setConsecutive, stopAction);
+  const { hardResetGame } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, slayerRef, slayer.setCurrentTask, slayer.setSlayerPoints, slayer.setConsecutive, stopAction, monsterStatsRef, setMonsterStats);
 
   // Market simulation tick (elke 4 seconden)
   useEffect(() => {
@@ -683,10 +749,10 @@ export default function App({ user, signOut }) {
         <TopBar inventory={inventory} screen={screen} skills={skills} setScreen={setScreen} setActivePopup={setActivePopup} hardResetGame={hardResetGame} signOut={signOut} user={user} />
 
         <div className="main-body">
-        <Sidebar screen={screen} setScreen={setScreen} skills={skills} />
+        <Sidebar screen={screen} setScreen={setScreen} skills={skills} activeAction={activeAction} ACTIONS={ACTIONS} />
 
         <main className="content-area">
-          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} />}
+          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} claimAllTools={claimAllTools} claimedTools={claimedTools} TOOL_SKILLS={TOOL_SKILLS} monsterStats={monsterStats} ACTIONS={ACTIONS} ITEM_IMAGES={ITEM_IMAGES} />}
           {screen === 'inventory' && <InventoryView inventory={inventory} ARMOR={ARMOR} equipment={equipment} equipmentAmounts={equipmentAmounts} WEAPONS={WEAPONS} AMMO={AMMO} toggleEquip={toggleEquip} combatStyle={combatStyle} setCombatStyle={setCombatStyle} sellItemToShop={sellItemToShop} setActivePopup={setActivePopup} depositToVault={depositToVault} clan={clan} setInventory={setInventory} inventoryOrder={inventoryOrder} setInventoryOrder={setInventoryOrder} />}
           {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} />}
           {screen === 'clan' && (
@@ -809,6 +875,7 @@ export default function App({ user, signOut }) {
                     AMMO={AMMO}
                     slayerTask={slayer.currentTask}
                     combatLog={combat.combatLog}
+                    setScreen={setScreen}
                   />
                 )
               ) : screen === 'infusion' ? (
@@ -859,7 +926,7 @@ export default function App({ user, signOut }) {
         </div>
       </div>
 
-      <FloatingBar activeAction={activeAction} ACTIONS={ACTIONS} progress={progress} stopAction={stopAction} setScreen={setScreen} screen={screen} xpDrops={xpDrops} />
+      <FloatingBar activeAction={activeAction} ACTIONS={ACTIONS} progress={progress} stopAction={stopAction} setScreen={setScreen} screen={screen} xpDrops={xpDrops} combatStyle={combatStyle} combatState={combat.combatState} />
       <PetNotificationDisplay petNotifications={petNotifications} />
 
       {/* Slayer Task Complete Popup */}

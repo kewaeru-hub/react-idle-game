@@ -1,10 +1,23 @@
 import React from 'react';
 
-export default function FloatingBar({ activeAction, ACTIONS, progress, stopAction, setScreen, screen, xpDrops = [] }) {
+export default function FloatingBar({ activeAction, ACTIONS, progress, stopAction, setScreen, screen, xpDrops = [], combatStyle, combatState }) {
   if (!activeAction) return null;
   const data = ACTIONS[activeAction];
+  if (!data) return null;
 
   if (screen === data.skill) return null;
+
+  // Determine display name: for combat show the combat style, otherwise the skill name
+  const skillDisplay = data.skill === 'combat' && combatStyle
+    ? combatStyle.charAt(0).toUpperCase() + combatStyle.slice(1)
+    : data.skill
+      ? data.skill.charAt(0).toUpperCase() + data.skill.slice(1)
+      : 'Active';
+
+  const isCombat = data.skill === 'combat';
+  const enemyHpPercent = combatState && combatState.enemyMaxHp > 0 
+    ? (combatState.enemyHp / combatState.enemyMaxHp) * 100 
+    : 0;
 
   return (
     <div className="floating-bar" style={{
@@ -64,16 +77,33 @@ export default function FloatingBar({ activeAction, ACTIONS, progress, stopActio
       })}
     </div>
       <div className="floating-bar-title" style={{ fontSize: '14px', fontWeight: 'bold', color: '#2ecc71', textAlign: 'center' }}>
-        Active: {data.name}
+        {skillDisplay}: {data.name}
       </div>
 
-      <div className="floating-bar-progress" style={{ width: '100%', height: '5px', background: '#0b1014', borderRadius: '2px', overflow: 'hidden', marginBottom: '5px' }}>
-        <div style={{ 
-          width: `${progress}%`, 
-          height: '100%', 
-          background: '#2ecc71',
-          transition: progress > 2 ? 'width 0.1s linear' : 'none' 
-        }}></div>
+      <div style={{ position: 'relative', marginBottom: '5px' }}>
+        <div style={{
+          position: 'absolute',
+          top: '-14px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: 'clamp(10px, 2vw, 13px)',
+          color: '#ffffff',
+          fontWeight: 'bold',
+          textShadow: '0 0 3px rgba(0,0,0,0.8)',
+          pointerEvents: 'none',
+          whiteSpace: 'nowrap',
+          display: isCombat && combatState ? 'block' : 'none'
+        }}>
+          {Math.ceil(combatState?.enemyHp || 0)}/{Math.ceil(combatState?.enemyMaxHp || 1)}
+        </div>
+        <div className="floating-bar-progress" style={{ width: '100%', height: '5px', background: '#0b1014', borderRadius: '2px', overflow: 'hidden' }}>
+          <div style={{ 
+            width: isCombat ? `${enemyHpPercent}%` : `${progress}%`, 
+            height: '100%', 
+            background: isCombat ? '#d32f2f' : '#2ecc71',
+            transition: (isCombat || progress > 2) ? 'width 0.1s linear' : 'none' 
+          }}></div>
+        </div>
       </div>
 
       <div className="floating-bar-btns" style={{ display: 'flex', gap: '10px' }}>

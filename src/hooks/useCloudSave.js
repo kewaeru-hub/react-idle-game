@@ -34,7 +34,8 @@ export function useCloudSave(
   setOfflineProgress,
   inventoryOrderRef, setInventoryOrder,
   slayerRef, setSlayerCurrentTask, setSlayerPoints, setSlayerConsecutive,
-  stopAction
+  stopAction,
+  monsterStatsRef, setMonsterStats
 ) {
   const saveInProgress = useRef(false);
   const hasLoaded = useRef({});
@@ -64,6 +65,7 @@ export function useCloudSave(
       clan,
       market: marketRef?.current || null,
       slayer: slayerRef?.current || null,
+      monsterStats: monsterStatsRef?.current || {},
       lastSaveTimestamp: Date.now(),
       activeAction
     };
@@ -92,6 +94,7 @@ export function useCloudSave(
       if (parsed.toolboxes && setToolboxes) setToolboxes(parsed.toolboxes);
       if (parsed.clan && setClan) setClan(parsed.clan);
       if (parsed.inventoryOrder && setInventoryOrder) setInventoryOrder(parsed.inventoryOrder);
+      if (parsed.monsterStats && setMonsterStats) setMonsterStats(parsed.monsterStats);
       if (parsed.market) {
         if (parsed.market.marketOffers && setMarketOffers) setMarketOffers(parsed.market.marketOffers);
         if (parsed.market.marketSlots && setMarketSlots) setMarketSlots(parsed.market.marketSlots);

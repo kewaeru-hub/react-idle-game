@@ -28,112 +28,98 @@ export const PET_DROP_HOURS = 600; // 1 skilling pet drops per 600 hours of skil
 // ==========================================
 
 export const WEAPONS = {
-  // --- MELEE WEAPONS (Swords/Scimitars) ---
-  bronze_sword: { name: 'Bronze Sword', att: 5, str: 4, speedTicks: 4, type: 'melee', value: 25 },
-  iron_sword: { name: 'Iron Sword', att: 10, str: 9, speedTicks: 4, type: 'melee', value: 75 },
-  rune_sword: { name: 'Rune Sword', att: 38, str: 39, speedTicks: 4, type: 'melee', value: 12500 },
-  dragon_sword: { name: 'Dragon Sword', att: 65, str: 63, speedTicks: 4, type: 'melee', value: 45000 },
-  abyssal_whip: { name: 'Abyssal Whip', att: 82, str: 82, speedTicks: 4, type: 'melee', value: 1200000 },
-  
   // --- SCIMITARS (Melee) ---
-  bronze_scimitar: { name: 'Bronze Scimitar', att: 6, str: 5, speedTicks: 4, type: 'melee', value: 30 },
-  iron_scimitar: { name: 'Iron Scimitar', att: 12, str: 10, speedTicks: 4, type: 'melee', value: 85 },
-  steel_scimitar: { name: 'Steel Scimitar', att: 18, str: 16, speedTicks: 4, type: 'melee', value: 180 },
-  alloy_scimitar: { name: 'Alloy Scimitar', att: 28, str: 26, speedTicks: 4, type: 'melee', value: 450 },
-  apex_scimitar: { name: 'Apex Scimitar', att: 42, str: 40, speedTicks: 4, type: 'melee', value: 1200 },
-  nova_scimitar: { name: 'Nova Scimitar', att: 65, str: 62, speedTicks: 4, type: 'melee', value: 3500 },
+  bronze_scimitar: { name: 'Bronze Scimitar', att: 6, str: 6, speedTicks: 4, type: 'melee', value: 30 },
+  iron_scimitar: { name: 'Iron Scimitar', att: 10, str: 9, speedTicks: 4, type: 'melee', value: 85 },
+  steel_scimitar: { name: 'Steel Scimitar', att: 21, str: 20, speedTicks: 4, type: 'melee', value: 180 },
+  alloy_scimitar: { name: 'Alloy Scimitar', att: 29, str: 28, speedTicks: 4, type: 'melee', value: 450 },
+  apex_scimitar: { name: 'Apex Scimitar', att: 45, str: 44, speedTicks: 4, type: 'melee', value: 1200 },
+  nova_scimitar: { name: 'Nova Scimitar', att: 67, str: 66, speedTicks: 4, type: 'melee', value: 3500 },
   
   // --- BOWS (Ranged) ---
-  bronze_bow: { name: 'Bronze Bow', att: 6, str: 5, speedTicks: 4, type: 'ranged', value: 35 },
-  iron_bow: { name: 'Iron Bow', att: 12, str: 10, speedTicks: 4, type: 'ranged', value: 95 },
-  steel_bow: { name: 'Steel Bow', att: 20, str: 18, speedTicks: 4, type: 'ranged', value: 210 },
-  alloy_bow: { name: 'Alloy Bow', att: 30, str: 28, speedTicks: 4, type: 'ranged', value: 520 },
-  apex_bow: { name: 'Apex Bow', att: 45, str: 43, speedTicks: 4, type: 'ranged', value: 1400 },
-  nova_bow: { name: 'Nova Bow', att: 68, str: 65, speedTicks: 4, type: 'ranged', value: 4000 },
+  bronze_bow: { name: 'Bronze Bow', att: 8, str: 0, speedTicks: 3, type: 'ranged', value: 35 },
+  iron_bow: { name: 'Iron Bow', att: 14, str: 0, speedTicks: 3, type: 'ranged', value: 95 },
+  steel_bow: { name: 'Steel Bow', att: 20, str: 0, speedTicks: 3, type: 'ranged', value: 210 },
+  alloy_bow: { name: 'Alloy Bow', att: 29, str: 0, speedTicks: 3, type: 'ranged', value: 520 },
+  apex_bow: { name: 'Apex Bow', att: 47, str: 0, speedTicks: 3, type: 'ranged', value: 1400 },
+  nova_bow: { name: 'Nova Bow', att: 69, str: 0, speedTicks: 3, type: 'ranged', value: 4000 },
   
   // --- STAFFS (Magic) ---
-  wooden_staff: { name: 'Wooden Staff', att: 10, str: 5, speedTicks: 5, type: 'magic', value: 50 },
-  bronze_staff: { name: 'Bronze Staff', att: 8, str: 6, speedTicks: 5, type: 'magic', value: 40 },
-  iron_staff: { name: 'Iron Staff', att: 14, str: 12, speedTicks: 5, type: 'magic', value: 110 },
-  steel_staff: { name: 'Steel Staff', att: 22, str: 20, speedTicks: 5, type: 'magic', value: 240 },
-  alloy_staff: { name: 'Alloy Staff', att: 32, str: 30, speedTicks: 5, type: 'magic', value: 600 },
-  apex_staff: { name: 'Apex Staff', att: 48, str: 45, speedTicks: 5, type: 'magic', value: 1600 },
-  nova_staff: { name: 'Nova Staff', att: 72, str: 68, speedTicks: 5, type: 'magic', value: 4500 },
-  shortbow: { name: 'Shortbow', att: 7, str: 6, speedTicks: 4, type: 'ranged', value: 50 }
+  bronze_staff: { name: 'Bronze Staff', att: 12, str: 18, speedTicks: 5, type: 'magic', value: 40 },
+  iron_staff: { name: 'Iron Staff', att: 26, str: 39, speedTicks: 5, type: 'magic', value: 110 },
+  steel_staff: { name: 'Steel Staff', att: 42, str: 58, speedTicks: 5, type: 'magic', value: 240 },
+  alloy_staff: { name: 'Alloy Staff', att: 63, str: 76, speedTicks: 5, type: 'magic', value: 600 },
+  apex_staff: { name: 'Apex Staff', att: 101, str: 115, speedTicks: 5, type: 'magic', value: 1600 },
+  nova_staff: { name: 'Nova Staff', att: 132, str: 152, speedTicks: 5, type: 'magic', value: 4500 }
 };
 
 export const ARMOR = {
   // 🗡️ MELEE ARMOR
-  bronze_helmet: { name: 'Bronze Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 5, rangedDef: 6, magicDef: -1, value: 20 },
-  bronze_body: { name: 'Bronze Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 15, rangedDef: 14, magicDef: -4, value: 60 },
-  bronze_legs: { name: 'Bronze Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 10, rangedDef: 9, magicDef: -2, value: 40 },
-  bronze_shield: { name: 'Bronze Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 12, rangedDef: 10, magicDef: -2, value: 30 },
+  bronze_helmet: { name: 'Bronze Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 4, rangedDef: 4, magicDef: -1, value: 20 },
+  bronze_body: { name: 'Bronze Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 11, rangedDef: 14, magicDef: -4, value: 60 },
+  bronze_legs: { name: 'Bronze Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 7, rangedDef: 9, magicDef: -2, value: 40 },
+  bronze_shield: { name: 'Bronze Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 5, rangedDef: 6, magicDef: -2, value: 30 },
   
-  iron_helmet: { name: 'Iron Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 7, rangedDef: 8, magicDef: -1, value: 55 },
-  iron_body: { name: 'Iron Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 22, rangedDef: 20, magicDef: -4, value: 160 },
-  iron_legs: { name: 'Iron Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 14, rangedDef: 13, magicDef: -2, value: 110 },
-  iron_shield: { name: 'Iron Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 18, rangedDef: 16, magicDef: -2, value: 135 },
+  iron_helmet: { name: 'Iron Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 6, rangedDef: 6, magicDef: -1, value: 55 },
+  iron_body: { name: 'Iron Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 18, rangedDef: 20, magicDef: -4, value: 160 },
+  iron_legs: { name: 'Iron Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 11, rangedDef: 13, magicDef: -2, value: 110 },
+  iron_shield: { name: 'Iron Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 8, rangedDef: 9, magicDef: -2, value: 135 },
 
-  rune_helmet: { name: 'Rune Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 30, rangedDef: 32, magicDef: -3, value: 12500 },
-  rune_body: { name: 'Rune Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 82, rangedDef: 80, magicDef: -8, value: 39000 },
-  rune_legs: { name: 'Rune Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 51, rangedDef: 49, magicDef: -4, value: 26000 },
-  rune_shield: { name: 'Rune Shield', equipSlot: 'shield', accuracy: -2, magicAcc: -10, rangedAcc: -3, defence: 48, rangedDef: 45, magicDef: -6, value: 6500 },
+  steel_helmet: { name: 'Steel Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 12, rangedDef: 12, magicDef: -2, value: 180 },
+  steel_body: { name: 'Steel Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 32, rangedDef: 31, magicDef: -5, value: 400 },
+  steel_legs: { name: 'Steel Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 20, rangedDef: 20, magicDef: -3, value: 280 },
+  steel_shield: { name: 'Steel Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 15, rangedDef: 15, magicDef: -3, value: 220 },
+
+  alloy_helmet: { name: 'Alloy Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -4, rangedAcc: -2, defence: 17, rangedDef: 17, magicDef: -5, value: 18000 },
+  alloy_body: { name: 'Alloy Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -18, rangedAcc: -8, defence: 46, rangedDef: 44, magicDef: -10, value: 54000 },
+  alloy_legs: { name: 'Alloy Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -13, rangedAcc: -6, defence: 29, rangedDef: 28, magicDef: -5, value: 36000 },
+  alloy_shield: { name: 'Alloy Shield', equipSlot: 'shield', accuracy: -2, magicAcc: -10, rangedAcc: -3, defence: 22, rangedDef: 21, magicDef: -8, value: 42000 },
   
-  steel_helmet: { name: 'Steel Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 20, rangedDef: 22, magicDef: -2, value: 180 },
-  steel_body: { name: 'Steel Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 50, rangedDef: 48, magicDef: -5, value: 400 },
-  steel_legs: { name: 'Steel Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 32, rangedDef: 30, magicDef: -3, value: 280 },
-  steel_shield: { name: 'Steel Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 28, rangedDef: 25, magicDef: -3, value: 220 },
+  apex_helmet: { name: 'Apex Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -5, rangedAcc: -2, defence: 24, rangedDef: 24, magicDef: -6, value: 45000 },
+  apex_body: { name: 'Apex Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -20, rangedAcc: -10, defence: 65, rangedDef: 63, magicDef: -12, value: 135000 },
+  apex_legs: { name: 'Apex Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 42, rangedDef: 40, magicDef: -7, value: 90000 },
+  apex_shield: { name: 'Apex Shield', equipSlot: 'shield', accuracy: -3, magicAcc: -12, rangedAcc: -4, defence: 31, rangedDef: 30, magicDef: -10, value: 105000 },
   
-  // Alloy, Apex, Nova tiers (custom additions for infusion)
-  alloy_helmet: { name: 'Alloy Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -4, rangedAcc: -2, defence: 45, rangedDef: 48, magicDef: -5, value: 18000 },
-  alloy_body: { name: 'Alloy Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -18, rangedAcc: -8, defence: 120, rangedDef: 115, magicDef: -10, value: 54000 },
-  alloy_legs: { name: 'Alloy Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -13, rangedAcc: -6, defence: 75, rangedDef: 70, magicDef: -5, value: 36000 },
-  alloy_shield: { name: 'Alloy Shield', equipSlot: 'shield', accuracy: -2, magicAcc: -10, rangedAcc: -3, defence: 60, rangedDef: 55, magicDef: -8, value: 42000 },
-  
-  apex_helmet: { name: 'Apex Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -5, rangedAcc: -2, defence: 62, rangedDef: 65, magicDef: -6, value: 45000 },
-  apex_body: { name: 'Apex Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -20, rangedAcc: -10, defence: 162, rangedDef: 155, magicDef: -12, value: 135000 },
-  apex_legs: { name: 'Apex Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 100, rangedDef: 92, magicDef: -7, value: 90000 },
-  apex_shield: { name: 'Apex Shield', equipSlot: 'shield', accuracy: -3, magicAcc: -12, rangedAcc: -4, defence: 82, rangedDef: 78, magicDef: -10, value: 105000 },
-  
-  nova_helmet: { name: 'Nova Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -6, rangedAcc: -3, defence: 85, rangedDef: 90, magicDef: -8, value: 120000 },
-  nova_body: { name: 'Nova Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -22, rangedAcc: -12, defence: 220, rangedDef: 210, magicDef: -15, value: 360000 },
-  nova_legs: { name: 'Nova Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -17, rangedAcc: -8, defence: 135, rangedDef: 125, magicDef: -9, value: 240000 },
-  nova_shield: { name: 'Nova Shield', equipSlot: 'shield', accuracy: -4, magicAcc: -15, rangedAcc: -5, defence: 112, rangedDef: 108, magicDef: -12, value: 280000 },
+  nova_helmet: { name: 'Nova Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -6, rangedAcc: -3, defence: 33, rangedDef: 33, magicDef: -8, value: 120000 },
+  nova_body: { name: 'Nova Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -22, rangedAcc: -12, defence: 88, rangedDef: 85, magicDef: -15, value: 360000 },
+  nova_legs: { name: 'Nova Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -17, rangedAcc: -8, defence: 57, rangedDef: 55, magicDef: -9, value: 240000 },
+  nova_shield: { name: 'Nova Shield', equipSlot: 'shield', accuracy: -4, magicAcc: -15, rangedAcc: -5, defence: 43, rangedDef: 42, magicDef: -12, value: 280000 },
 
   // 🏹 RANGED ARMOR
   leather_cowl: { name: 'Leather Cowl', equipSlot: 'head', accuracy: 0, magicAcc: -1, rangedAcc: 2, defence: 2, rangedDef: 4, magicDef: 4, value: 10 },
   leather_body: { name: 'Leather Body', equipSlot: 'body', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 9, rangedDef: 13, magicDef: 15, value: 25 },
   leather_chaps: { name: 'Leather Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -3, rangedAcc: 4, defence: 6, rangedDef: 9, magicDef: 10, value: 15 },
 
-  green_leather_cowl: { name: 'Green Cowl', equipSlot: 'head', accuracy: 0, magicAcc: -2, rangedAcc: 6, defence: 6, rangedDef: 10, magicDef: 8, value: 150 },
   green_leather_body: { name: 'Green Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450 },
   green_leather_chaps: { name: 'Green Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280 },
 
-  black_leather_cowl: { name: 'Black Cowl', equipSlot: 'head', accuracy: 0, magicAcc: -4, rangedAcc: 12, defence: 12, rangedDef: 20, magicDef: 18, value: 600 },
+  red_leather_body: { name: 'Red Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450 },
+  red_leather_chaps: { name: 'Red Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280 },
+
   black_leather_body: { name: 'Black Body', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: 30, defence: 50, rangedDef: 60, magicDef: 70, value: 1800 },
   black_leather_chaps: { name: 'Black Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -8, rangedAcc: 17, defence: 32, rangedDef: 40, magicDef: 45, value: 1100 },
 
   // 🧙 MAGIC ARMOR
   apprentice_hat: { name: 'Apprentice Hat', equipSlot: 'head', accuracy: -2, magicAcc: 3, rangedAcc: -2, defence: 2, rangedDef: 0, magicDef: 3, value: 15 },
-  apprentice_robe: { name: 'Apprentice Robe', equipSlot: 'body', accuracy: -4, magicAcc: 8, rangedAcc: -4, defence: 5, rangedDef: 0, magicDef: 8, value: 30 },
-  apprentice_skirt: { name: 'Apprentice Skirt', equipSlot: 'legs', accuracy: -3, magicAcc: 5, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 5, value: 20 },
+  apprentice_top: { name: 'Apprentice Top', equipSlot: 'body', accuracy: -4, magicAcc: 8, rangedAcc: -4, defence: 5, rangedDef: 0, magicDef: 8, value: 30 },
+  apprentice_bottom: { name: 'Apprentice Bottom', equipSlot: 'legs', accuracy: -3, magicAcc: 5, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 5, value: 20 },
 
   wizard_hat: { name: 'Wizard Hat', equipSlot: 'head', accuracy: -3, magicAcc: 6, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 6, value: 60 },
-  wizard_robe: { name: 'Wizard Robe', equipSlot: 'body', accuracy: -8, magicAcc: 15, rangedAcc: -8, defence: 10, rangedDef: 0, magicDef: 15, value: 120 },
-  wizard_skirt: { name: 'Wizard Skirt', equipSlot: 'legs', accuracy: -6, magicAcc: 10, rangedAcc: -6, defence: 8, rangedDef: 0, magicDef: 10, value: 80 },
+  wizard_top: { name: 'Wizard Top', equipSlot: 'body', accuracy: -8, magicAcc: 15, rangedAcc: -8, defence: 10, rangedDef: 0, magicDef: 15, value: 120 },
+  wizard_bottom: { name: 'Wizard Bottom', equipSlot: 'legs', accuracy: -6, magicAcc: 10, rangedAcc: -6, defence: 8, rangedDef: 0, magicDef: 10, value: 80 },
 
   mystic_hat: { name: 'Mystic Hat', equipSlot: 'head', accuracy: -5, magicAcc: 12, rangedAcc: -5, defence: 8, rangedDef: 0, magicDef: 12, value: 5000 },
-  mystic_robe: { name: 'Mystic Robe', equipSlot: 'body', accuracy: -15, magicAcc: 30, rangedAcc: -15, defence: 20, rangedDef: 0, magicDef: 30, value: 15000 },
-  mystic_skirt: { name: 'Mystic Skirt', equipSlot: 'legs', accuracy: -10, magicAcc: 20, rangedAcc: -10, defence: 15, rangedDef: 0, magicDef: 20, value: 10000 }
+  mystic_top: { name: 'Mystic Top', equipSlot: 'body', accuracy: -15, magicAcc: 30, rangedAcc: -15, defence: 20, rangedDef: 0, magicDef: 30, value: 15000 },
+  mystic_bottom: { name: 'Mystic Bottom', equipSlot: 'legs', accuracy: -10, magicAcc: 20, rangedAcc: -10, defence: 15, rangedDef: 0, magicDef: 20, value: 10000 }
 };
 
 export const AMMO = {
-  bronze_arrow: { id: 'bronze_arrow', name: 'Bronze Arrow', type: 'ammo', rangedStr: 5, value: 1 },
+  bronze_arrow: { id: 'bronze_arrow', name: 'Bronze Arrow', type: 'ammo', rangedStr: 7, value: 1 },
   iron_arrow: { id: 'iron_arrow', name: 'Iron Arrow', type: 'ammo', rangedStr: 10, value: 3 },
   steel_arrow: { id: 'steel_arrow', name: 'Steel Arrow', type: 'ammo', rangedStr: 16, value: 12 },
-  mithril_arrow: { id: 'mithril_arrow', name: 'Mithril Arrow', type: 'ammo', rangedStr: 22, value: 32 },
-  adamant_arrow: { id: 'adamant_arrow', name: 'Adamant Arrow', type: 'ammo', rangedStr: 31, value: 80 },
-  rune_arrow: { id: 'rune_arrow', name: 'Rune Arrow', type: 'ammo', rangedStr: 49, value: 200 },
+  alloy_arrow: { id: 'alloy_arrow', name: 'Alloy Arrow', type: 'ammo', rangedStr: 22, value: 32 },
+  apex_arrow: { id: 'apex_arrow', name: 'Apex Arrow', type: 'ammo', rangedStr: 31, value: 80 },
+  nova_arrow: { id: 'nova_arrow', name: 'Nova Arrow', type: 'ammo', rangedStr: 49, value: 200 },
 };
 
 // ==========================================
@@ -532,46 +518,46 @@ export const PRAYER_BOOK = [
 export const ACTIONS = {
 // --- COMBAT: MONSTERS & DROPS ---
 // --- BEGINNER (Lvl 1 - 10) ---
-  fight_chicken: { skill: 'combat', name: 'Chicken', reqLvl: 1, category: 'beginner', enemy: { hp: 3, att: 1, str: 1, def: 1, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { feathers: 5, meat: 1, bones: 1 } },
-  fight_cow: { skill: 'combat', name: 'Cow', reqLvl: 1, category: 'beginner', enemy: { hp: 8, att: 2, str: 2, def: 2, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { cowhide: 1, meat: 1, bones: 1 } },
-  fight_goblin: { skill: 'combat', name: 'Goblin', reqLvl: 1, category: 'beginner', enemy: { hp: 5, att: 2, str: 2, def: 1, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { coins: 5, bones: 1, bronze_sword: 1, potato_seed: 1 } },
-  fight_snake: { skill: 'combat', name: 'Snake', reqLvl: 1, category: 'beginner', enemy: { hp: 10, att: 4, str: 3, def: 2, speedTicks: 3, type: 'melee', weakness: 'magic' }, reward: { snake_hide: 1, meat: 1, bones: 1 } },
-  fight_wolf: { skill: 'combat', name: 'Wolf', reqLvl: 1, category: 'beginner', enemy: { hp: 12, att: 5, str: 4, def: 3, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { meat: 1, bones: 1, wolf_fur: 1 } },
-  fight_bear: { skill: 'combat', name: 'Bear', reqLvl: 1, category: 'beginner', enemy: { hp: 20, att: 6, str: 6, def: 5, speedTicks: 5, type: 'melee', weakness: 'magic' }, reward: { big_meat: 1, bear_fur: 1, big_bones: 1 } },
+  fight_chicken: { skill: 'combat', name: 'Chicken', reqLvl: 1, category: 'beginner', enemy: { hp: 3, str: 1, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 1, ranged: 0, magic: 0 }, defBonus: { melee: 1, ranged: 1, magic: 0 } }, reward: { feathers: 5, meat: 1, bones: 1 } },
+  fight_cow: { skill: 'combat', name: 'Cow', reqLvl: 1, category: 'beginner', enemy: { hp: 8, str: 2, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 2, ranged: 0, magic: 0 }, defBonus: { melee: 3, ranged: 2, magic: 1 } }, reward: { cowhide: 1, meat: 1, bones: 1 } },
+  fight_goblin: { skill: 'combat', name: 'Goblin', reqLvl: 1, category: 'beginner', enemy: { hp: 5, str: 2, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 2, ranged: 0, magic: 0 }, defBonus: { melee: 1, ranged: 1, magic: 0 } }, reward: { coins: 5, bones: 1, bronze_scimitar: 1, potato_seed: 1 } },
+  fight_snake: { skill: 'combat', name: 'Snake', reqLvl: 1, category: 'beginner', enemy: { hp: 10, str: 3, speedTicks: 3, type: 'melee', weakness: 'magic', offAtt: { melee: 4, ranged: 0, magic: 0 }, defBonus: { melee: 3, ranged: 2, magic: 1 } }, reward: { snake_hide: 1, meat: 1, bones: 1 } },
+  fight_wolf: { skill: 'combat', name: 'Wolf', reqLvl: 1, category: 'beginner', enemy: { hp: 12, str: 4, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 5, ranged: 0, magic: 0 }, defBonus: { melee: 4, ranged: 3, magic: 1 } }, reward: { meat: 1, bones: 1, wolf_fur: 1 } },
+  fight_bear: { skill: 'combat', name: 'Bear', reqLvl: 1, category: 'beginner', enemy: { hp: 20, str: 6, speedTicks: 5, type: 'melee', weakness: 'magic', offAtt: { melee: 6, ranged: 0, magic: 0 }, defBonus: { melee: 7, ranged: 5, magic: 2 } }, reward: { big_meat: 1, bear_fur: 1, big_bones: 1 } },
 
   // --- EASY (Lvl 15 - 45) ---
-  fight_zombie: { skill: 'combat', name: 'Zombie', reqLvl: 1, category: 'easy', enemy: { hp: 22, att: 8, str: 7, def: 6, speedTicks: 5, type: 'melee', weakness: 'magic' }, reward: { bones: 1, iron_sword: 1, iron_gem: 1 } },
-  fight_scorpion: { skill: 'combat', name: 'Scorpion', reqLvl: 1, category: 'easy', enemy: { hp: 25, att: 10, str: 8, def: 10, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { meat: 1, bones: 1, bronze_bar: 1 } },
-  fight_druid: { skill: 'combat', name: 'Druid', reqLvl: 1, category: 'easy', enemy: { hp: 30, att: 12, str: 10, def: 8, speedTicks: 5, type: 'magic', weakness: 'range' }, reward: { wooden_staff: 1, bones: 1, guam_leaf: 2, herb_seed: 1 } },
-  fight_orc: { skill: 'combat', name: 'Orc', reqLvl: 1, category: 'easy', enemy: { hp: 35, att: 15, str: 14, def: 12, speedTicks: 5, type: 'melee', weakness: 'magic' }, reward: { coins: 20, iron_bar: 1, big_bones: 1, watermelon_seed: 1 } },
-  fight_crocodile: { skill: 'combat', name: 'Crocodile', reqLvl: 1, category: 'easy', enemy: { hp: 40, att: 18, str: 16, def: 15, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { big_meat: 1, big_bones: 1, water_rune: 15 } },
-  fight_giant: { skill: 'combat', name: 'Giant', reqLvl: 1, category: 'easy', enemy: { hp: 50, att: 20, str: 22, def: 15, speedTicks: 6, type: 'melee', weakness: 'magic' }, reward: { big_meat: 1, coins: 50, big_bones: 1, steel_gem: 1, oak_seed: 1 } },
-  fight_green_dragon: { skill: 'combat', name: 'Green Dragon', reqLvl: 1, category: 'easy', enemy: { hp: 75, att: 25, str: 25, def: 25, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { green_dhide: 1, dragon_bones: 1, steel_gem: 1 } },
+  fight_zombie: { skill: 'combat', name: 'Zombie', reqLvl: 1, category: 'easy', enemy: { hp: 22, str: 7, speedTicks: 5, type: 'melee', weakness: 'magic', offAtt: { melee: 8, ranged: 0, magic: 0 }, defBonus: { melee: 8, ranged: 6, magic: 2 } }, reward: { bones: 1, iron_scimitar: 1, iron_gem: 1 } },
+  fight_scorpion: { skill: 'combat', name: 'Scorpion', reqLvl: 1, category: 'easy', enemy: { hp: 25, str: 8, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 10, ranged: 0, magic: 0 }, defBonus: { melee: 12, ranged: 10, magic: 3 } }, reward: { meat: 1, bones: 1, bronze_bar: 1 } },
+  fight_druid: { skill: 'combat', name: 'Druid', reqLvl: 1, category: 'easy', enemy: { hp: 30, str: 10, speedTicks: 5, type: 'magic', weakness: 'range', offAtt: { melee: 0, ranged: 0, magic: 12 }, defBonus: { melee: 5, ranged: 5, magic: 15 } }, reward: { bronze_staff: 1, bones: 1, guam_leaf: 2, herb_seed: 1 } },
+  fight_orc: { skill: 'combat', name: 'Orc', reqLvl: 1, category: 'easy', enemy: { hp: 35, str: 14, speedTicks: 5, type: 'melee', weakness: 'magic', offAtt: { melee: 15, ranged: 0, magic: 0 }, defBonus: { melee: 14, ranged: 10, magic: 4 } }, reward: { coins: 20, iron_bar: 1, big_bones: 1, watermelon_seed: 1 } },
+  fight_crocodile: { skill: 'combat', name: 'Crocodile', reqLvl: 1, category: 'easy', enemy: { hp: 40, str: 16, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 18, ranged: 0, magic: 0 }, defBonus: { melee: 18, ranged: 15, magic: 5 } }, reward: { big_meat: 1, big_bones: 1, water_rune: 15 } },
+  fight_giant: { skill: 'combat', name: 'Giant', reqLvl: 1, category: 'easy', enemy: { hp: 50, str: 22, speedTicks: 6, type: 'melee', weakness: 'magic', offAtt: { melee: 20, ranged: 0, magic: 0 }, defBonus: { melee: 20, ranged: 15, magic: 6 } }, reward: { big_meat: 1, coins: 50, big_bones: 1, steel_gem: 1, oak_seed: 1 } },
+  fight_green_dragon: { skill: 'combat', name: 'Green Dragon', reqLvl: 1, category: 'easy', enemy: { hp: 75, str: 25, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 25, ranged: 0, magic: 0 }, defBonus: { melee: 28, ranged: 22, magic: 18 } }, reward: { green_dhide: 1, dragon_bones: 1, steel_gem: 1 } },
 
   // --- MODERATE (Lvl 50 - 75) ---
-  fight_ghost: { skill: 'combat', name: 'Ghost', reqLvl: 1, category: 'moderate', enemy: { hp: 55, att: 30, str: 25, def: 30, speedTicks: 5, type: 'magic', weakness: 'range' }, reward: { ectoplasm: 1, bones: 1, mind_rune: 20 } },
-  fight_red_spider: { skill: 'combat', name: 'Red Spider', reqLvl: 1, category: 'moderate', enemy: { hp: 60, att: 35, str: 28, def: 25, speedTicks: 3, type: 'melee', weakness: 'magic' }, reward: { spider_eggs: 2, bones: 1 } },
-  fight_swamp_lizard: { skill: 'combat', name: 'Swamp Lizard', reqLvl: 1, category: 'moderate', enemy: { hp: 70, att: 40, str: 35, def: 35, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { swamp_tar: 3, great_meat: 1, big_bones: 1 } },
-  fight_demon: { skill: 'combat', name: 'Demon', reqLvl: 1, category: 'moderate', enemy: { hp: 80, att: 45, str: 45, def: 40, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { rune_ore: 1, big_bones: 1, mithril_gem: 1, demonic_ashes: 1 } },
-  fight_demonic_scorpion: { skill: 'combat', name: 'Demonic Scorpion', reqLvl: 1, category: 'moderate', enemy: { hp: 85, att: 50, str: 48, def: 50, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { great_meat: 1, alloy_bar: 1, big_bones: 1, mithril_gem: 1 } }, 
-  fight_red_dragon: { skill: 'combat', name: 'Red Dragon', reqLvl: 1, category: 'moderate', enemy: { hp: 110, att: 55, str: 60, def: 60, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { red_dhide: 1, dragon_bones: 1, adamant_gem: 1 } },
+  fight_ghost: { skill: 'combat', name: 'Ghost', reqLvl: 1, category: 'moderate', enemy: { hp: 55, str: 25, speedTicks: 5, type: 'magic', weakness: 'range', offAtt: { melee: 0, ranged: 0, magic: 30 }, defBonus: { melee: 10, ranged: 10, magic: 40 } }, reward: { ectoplasm: 1, bones: 1, mind_rune: 20 } },
+  fight_red_spider: { skill: 'combat', name: 'Red Spider', reqLvl: 1, category: 'moderate', enemy: { hp: 60, str: 28, speedTicks: 3, type: 'melee', weakness: 'magic', offAtt: { melee: 35, ranged: 0, magic: 0 }, defBonus: { melee: 30, ranged: 25, magic: 8 } }, reward: { spider_eggs: 2, bones: 1 } },
+  fight_swamp_lizard: { skill: 'combat', name: 'Swamp Lizard', reqLvl: 1, category: 'moderate', enemy: { hp: 70, str: 35, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 40, ranged: 0, magic: 0 }, defBonus: { melee: 38, ranged: 30, magic: 12 } }, reward: { swamp_tar: 3, great_meat: 1, big_bones: 1 } },
+  fight_demon: { skill: 'combat', name: 'Demon', reqLvl: 1, category: 'moderate', enemy: { hp: 80, str: 45, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 45, ranged: 0, magic: 0 }, defBonus: { melee: 45, ranged: 40, magic: 10 } }, reward: { rune_ore: 1, big_bones: 1, mithril_gem: 1, demonic_ashes: 1 } },
+  fight_demonic_scorpion: { skill: 'combat', name: 'Demonic Scorpion', reqLvl: 1, category: 'moderate', enemy: { hp: 85, str: 48, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 50, ranged: 0, magic: 0 }, defBonus: { melee: 55, ranged: 50, magic: 12 } }, reward: { great_meat: 1, alloy_bar: 1, big_bones: 1, mithril_gem: 1 } }, 
+  fight_red_dragon: { skill: 'combat', name: 'Red Dragon', reqLvl: 1, category: 'moderate', enemy: { hp: 110, str: 60, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 55, ranged: 0, magic: 0 }, defBonus: { melee: 65, ranged: 50, magic: 40 } }, reward: { red_dhide: 1, dragon_bones: 1, adamant_gem: 1 } },
 
   // --- HARD (Lvl 80 - 100) ---
-  fight_vampire: { skill: 'combat', name: 'Vampire', reqLvl: 1, category: 'hard', enemy: { hp: 120, att: 65, str: 65, def: 60, speedTicks: 3, type: 'melee', weakness: 'magic' }, reward: { vampire_dust: 1, blood_rune: 5, bones: 1, adamant_gem: 1 } },
-  fight_werewolf: { skill: 'combat', name: 'Possessed Werewolf', reqLvl: 1, category: 'hard', enemy: { hp: 135, att: 75, str: 70, def: 65, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { great_meat: 1, big_bones: 1, wolf_fur: 2 } },
-  fight_demonic_zombie: { skill: 'combat', name: 'Demonic Zombie', reqLvl: 1, category: 'hard', enemy: { hp: 150, att: 80, str: 85, def: 80, speedTicks: 5, type: 'melee', weakness: 'range' }, reward: { apex_bar: 1, big_bones: 1, adamant_gem: 1, ranarr_weed: 1 } },
-  fight_dark_warrior: { skill: 'combat', name: 'Dark Warrior', reqLvl: 1, category: 'hard', enemy: { hp: 160, att: 90, str: 90, def: 95, speedTicks: 4, type: 'melee', weakness: 'magic' }, reward: { rune_sword: 1, bones: 1, adamant_gem: 1, coins: 150 } },
-  fight_black_dragon: { skill: 'combat', name: 'Black Dragon', reqLvl: 1, category: 'hard', enemy: { hp: 190, att: 100, str: 105, def: 110, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { black_dhide: 1, dragon_bones: 1, rune_gem: 1, magic_seed: 1 } },
+  fight_vampire: { skill: 'combat', name: 'Vampire', reqLvl: 1, category: 'hard', enemy: { hp: 120, str: 65, speedTicks: 3, type: 'melee', weakness: 'magic', offAtt: { melee: 65, ranged: 0, magic: 0 }, defBonus: { melee: 70, ranged: 60, magic: 15 } }, reward: { vampire_dust: 1, blood_rune: 5, bones: 1, adamant_gem: 1 } },
+  fight_werewolf: { skill: 'combat', name: 'Possessed Werewolf', reqLvl: 1, category: 'hard', enemy: { hp: 135, str: 70, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 75, ranged: 0, magic: 0 }, defBonus: { melee: 72, ranged: 65, magic: 18 } }, reward: { great_meat: 1, big_bones: 1, wolf_fur: 2 } },
+  fight_demonic_zombie: { skill: 'combat', name: 'Demonic Zombie', reqLvl: 1, category: 'hard', enemy: { hp: 150, str: 85, speedTicks: 5, type: 'melee', weakness: 'range', offAtt: { melee: 80, ranged: 0, magic: 0 }, defBonus: { melee: 85, ranged: 70, magic: 20 } }, reward: { apex_bar: 1, big_bones: 1, adamant_gem: 1, ranarr_weed: 1 } },
+  fight_dark_warrior: { skill: 'combat', name: 'Dark Warrior', reqLvl: 1, category: 'hard', enemy: { hp: 160, str: 90, speedTicks: 4, type: 'melee', weakness: 'magic', offAtt: { melee: 90, ranged: 0, magic: 0 }, defBonus: { melee: 100, ranged: 90, magic: 25 } }, reward: { apex_scimitar: 1, bones: 1, adamant_gem: 1, coins: 150 } },
+  fight_black_dragon: { skill: 'combat', name: 'Black Dragon', reqLvl: 1, category: 'hard', enemy: { hp: 190, str: 105, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 100, ranged: 0, magic: 0 }, defBonus: { melee: 120, ranged: 100, magic: 80 } }, reward: { black_dhide: 1, dragon_bones: 1, rune_gem: 1, magic_seed: 1 } },
 
   // --- EXTREME (Lvl 105+) ---
-  fight_wyvern: { skill: 'combat', name: 'Wyvern', reqLvl: 1, category: 'extreme', enemy: { hp: 220, att: 115, str: 115, def: 120, speedTicks: 4, type: 'range', weakness: 'melee' }, reward: { wyvern_bones: 1, dragon_bones: 1, rune_gem: 1, snapdragon: 1 } },
-  fight_demonic_giant: { skill: 'combat', name: 'Demonic Giant', reqLvl: 1, category: 'extreme', enemy: { hp: 250, att: 130, str: 140, def: 125, speedTicks: 6, type: 'melee', weakness: 'magic' }, reward: { great_meat: 1, coins: 500, big_bones: 1, rune_gem: 1 } },
-  fight_abyssal_demon: { skill: 'combat', name: 'Abyssal Demon', reqLvl: 1, category: 'extreme', enemy: { hp: 280, att: 140, str: 135, def: 130, speedTicks: 4, type: 'melee', weakness: 'range' }, reward: { demonic_ashes: 2, abyssal_whip: 1, big_bones: 1, rune_gem: 1 } },
-  fight_chaos_elemental: { skill: 'combat', name: 'Chaos Elemental', reqLvl: 1, category: 'extreme', enemy: { hp: 300, att: 150, str: 140, def: 150, speedTicks: 4, type: 'magic', weakness: 'melee' }, reward: { chaos_rune: 50, coins: 1000, big_bones: 1, torstol: 1, rune_gem: 2 } },
-  fight_death_knight: { skill: 'combat', name: 'Death Knight', reqLvl: 1, category: 'extreme', enemy: { hp: 350, att: 160, str: 170, def: 165, speedTicks: 5, type: 'melee', weakness: 'magic' }, reward: { dragon_sword: 1, big_bones: 1, rune_gem: 1, blood_rune: 20 } },
+  fight_wyvern: { skill: 'combat', name: 'Wyvern', reqLvl: 1, category: 'extreme', enemy: { hp: 220, str: 115, speedTicks: 4, type: 'range', weakness: 'melee', offAtt: { melee: 0, ranged: 115, magic: 0 }, defBonus: { melee: 100, ranged: 130, magic: 110 } }, reward: { wyvern_bones: 1, dragon_bones: 1, rune_gem: 1, snapdragon: 1 } },
+  fight_demonic_giant: { skill: 'combat', name: 'Demonic Giant', reqLvl: 1, category: 'extreme', enemy: { hp: 250, str: 140, speedTicks: 6, type: 'melee', weakness: 'magic', offAtt: { melee: 130, ranged: 0, magic: 0 }, defBonus: { melee: 135, ranged: 120, magic: 30 } }, reward: { great_meat: 1, coins: 500, big_bones: 1, rune_gem: 1 } },
+  fight_abyssal_demon: { skill: 'combat', name: 'Abyssal Demon', reqLvl: 1, category: 'extreme', enemy: { hp: 280, str: 135, speedTicks: 4, type: 'melee', weakness: 'range', offAtt: { melee: 140, ranged: 0, magic: 0 }, defBonus: { melee: 140, ranged: 120, magic: 90 } }, reward: { demonic_ashes: 2, nova_scimitar: 1, big_bones: 1, rune_gem: 1 } },
+  fight_chaos_elemental: { skill: 'combat', name: 'Chaos Elemental', reqLvl: 1, category: 'extreme', enemy: { hp: 300, str: 140, speedTicks: 4, type: 'magic', weakness: 'melee', offAtt: { melee: 0, ranged: 0, magic: 150 }, defBonus: { melee: 100, ranged: 120, magic: 160 } }, reward: { chaos_rune: 50, coins: 1000, big_bones: 1, torstol: 1, rune_gem: 2 } },
+  fight_death_knight: { skill: 'combat', name: 'Death Knight', reqLvl: 1, category: 'extreme', enemy: { hp: 350, str: 170, speedTicks: 5, type: 'melee', weakness: 'magic', offAtt: { melee: 160, ranged: 0, magic: 0 }, defBonus: { melee: 175, ranged: 160, magic: 40 } }, reward: { nova_scimitar: 1, big_bones: 1, rune_gem: 1, blood_rune: 20 } },
 
   // --- LAVA CAVE (Boss Waves) ---
-  lava_cave: { skill: 'combat', name: 'Lava Cave', reqLvl: 1, category: 'bosses', isFightCave: true, enemy: { hp: 1, att: 1, str: 1, def: 1, speedTicks: 4, type: 'melee' }, reward: { coins: 5000, big_bones: 5, rune_gem: 2 } },
+  lava_cave: { skill: 'combat', name: 'Lava Cave', reqLvl: 1, category: 'bosses', isFightCave: true, enemy: { hp: 1, str: 1, speedTicks: 4, type: 'melee', offAtt: { melee: 1, ranged: 0, magic: 0 }, defBonus: { melee: 1, ranged: 1, magic: 1 } }, reward: { coins: 5000, big_bones: 5, rune_gem: 2 } },
 
 // --- PRAYER ---
   bury_normal: { skill: 'prayer', name: 'Bones', baseTime: 900, xp: 4.5, reqLvl: 1, cost: { bones: 1 }, reward: {} },
@@ -606,12 +592,12 @@ export const ACTIONS = {
   craft_black_dhide_body: { skill: 'crafting', name: 'Black D-hide Body', reqLvl: 85, category: 'armor', xp: 195, baseTime: 3660, cost: { black_dragon_leather: 3 }, reward: { black_dhide_body: 1 } },
 
   // --- AMMO (Logs + Bars naar Pijlen) ---
-  craft_bronze_arrow: { skill: 'crafting', name: 'Bronze Arrows (x15)', reqLvl: 1, category: 'ammo', xp: 12, baseTime: 1260, cost: { spruce_log: 1, bronze_bar: 1 }, reward: { bronze_arrow: 15 } },
-  craft_iron_arrow: { skill: 'crafting', name: 'Iron Arrows (x15)', reqLvl: 15, category: 'ammo', xp: 25, baseTime: 1440, cost: { oak_log: 1, iron_bar: 1 }, reward: { iron_arrow: 15 } },
-  craft_steel_arrow: { skill: 'crafting', name: 'Steel Arrows (x15)', reqLvl: 30, category: 'ammo', xp: 42, baseTime: 1680, cost: { willow_log: 1, steel_bar: 1 }, reward: { steel_arrow: 15 } },
-  craft_mithril_arrow: { skill: 'crafting', name: 'Mithril Arrows (x15)', reqLvl: 50, category: 'ammo', xp: 68, baseTime: 1920, cost: { maple_log: 1, alloy_bar: 1 }, reward: { mithril_arrow: 15 } },
-  craft_adamant_arrow: { skill: 'crafting', name: 'Adamant Arrows (x15)', reqLvl: 70, category: 'ammo', xp: 95, baseTime: 2220, cost: { yew_log: 1, apex_bar: 1 }, reward: { adamant_arrow: 15 } },
-  craft_rune_arrow: { skill: 'crafting', name: 'Rune Arrows (x15)', reqLvl: 85, category: 'ammo', xp: 130, baseTime: 2520, cost: { magic_log: 1, nova_bar: 1 }, reward: { rune_arrow: 15 } },
+  craft_bronze_arrow: { skill: 'crafting', name: 'Bronze Arrows (x40)', reqLvl: 1, category: 'ammo', xp: 12, baseTime: 1260, cost: { spruce_log: 1, bronze_bar: 1 }, reward: { bronze_arrow: 40 } },
+  craft_iron_arrow: { skill: 'crafting', name: 'Iron Arrows (x40)', reqLvl: 15, category: 'ammo', xp: 25, baseTime: 1440, cost: { oak_log: 1, iron_bar: 1 }, reward: { iron_arrow: 40 } },
+  craft_steel_arrow: { skill: 'crafting', name: 'Steel Arrows (x40)', reqLvl: 30, category: 'ammo', xp: 42, baseTime: 1680, cost: { willow_log: 1, steel_bar: 1 }, reward: { steel_arrow: 40 } },
+  craft_alloy_arrow: { skill: 'crafting', name: 'Alloy Arrows (x40)', reqLvl: 50, category: 'ammo', xp: 68, baseTime: 1920, cost: { maple_log: 1, alloy_bar: 1 }, reward: { alloy_arrow: 40 } },
+  craft_apex_arrow: { skill: 'crafting', name: 'Apex Arrows (x40)', reqLvl: 70, category: 'ammo', xp: 95, baseTime: 2220, cost: { yew_log: 1, apex_bar: 1 }, reward: { apex_arrow: 40 } },
+  craft_nova_arrow: { skill: 'crafting', name: 'Nova Arrows (x40)', reqLvl: 85, category: 'ammo', xp: 130, baseTime: 2520, cost: { magic_log: 1, nova_bar: 1 }, reward: { nova_arrow: 40 } },
 
 // ==========================================
   // --- SMITHING (Smelting - Ore to Bar) ---
@@ -635,10 +621,25 @@ export const ACTIONS = {
   smith_iron_legs: { skill: 'smithing', name: 'Iron Platelegs', reqLvl: 31, xp: 75, baseTime: 2700, cost: { iron_bar: 3 }, reward: { iron_legs: 1 } },
   smith_iron_body: { skill: 'smithing', name: 'Iron Platebody', reqLvl: 33, xp: 125, baseTime: 3720, cost: { iron_bar: 5 }, reward: { iron_body: 1 } },
 
-  // RUNE (Level 85+) - Updated to use apex_bar instead
-  smith_rune_helmet: { skill: 'smithing', name: 'Rune Helmet', reqLvl: 85, xp: 150, baseTime: 2880, cost: { apex_bar: 2 }, reward: { rune_helmet: 1 } },
-  smith_rune_legs: { skill: 'smithing', name: 'Rune Platelegs', reqLvl: 98, xp: 225, baseTime: 3480, cost: { apex_bar: 3 }, reward: { rune_legs: 1 } },
-  smith_rune_body: { skill: 'smithing', name: 'Rune Platebody', reqLvl: 99, xp: 375, baseTime: 4500, cost: { apex_bar: 5 }, reward: { rune_body: 1 } },
+  // STEEL (Level 30+)
+  smith_steel_helmet: { skill: 'smithing', name: 'Steel Helmet', reqLvl: 30, xp: 75, baseTime: 2400, cost: { steel_bar: 2 }, reward: { steel_helmet: 1 } },
+  smith_steel_legs: { skill: 'smithing', name: 'Steel Platelegs', reqLvl: 37, xp: 112, baseTime: 2880, cost: { steel_bar: 3 }, reward: { steel_legs: 1 } },
+  smith_steel_body: { skill: 'smithing', name: 'Steel Platebody', reqLvl: 41, xp: 187, baseTime: 3900, cost: { steel_bar: 5 }, reward: { steel_body: 1 } },
+
+  // ALLOY (Level 50+)
+  smith_alloy_helmet: { skill: 'smithing', name: 'Alloy Helmet', reqLvl: 50, xp: 110, baseTime: 2700, cost: { alloy_bar: 2 }, reward: { alloy_helmet: 1 } },
+  smith_alloy_legs: { skill: 'smithing', name: 'Alloy Platelegs', reqLvl: 57, xp: 165, baseTime: 3240, cost: { alloy_bar: 3 }, reward: { alloy_legs: 1 } },
+  smith_alloy_body: { skill: 'smithing', name: 'Alloy Platebody', reqLvl: 61, xp: 275, baseTime: 4200, cost: { alloy_bar: 5 }, reward: { alloy_body: 1 } },
+
+  // APEX (Level 70+)
+  smith_apex_helmet: { skill: 'smithing', name: 'Apex Helmet', reqLvl: 70, xp: 150, baseTime: 2880, cost: { apex_bar: 2 }, reward: { apex_helmet: 1 } },
+  smith_apex_legs: { skill: 'smithing', name: 'Apex Platelegs', reqLvl: 77, xp: 225, baseTime: 3480, cost: { apex_bar: 3 }, reward: { apex_legs: 1 } },
+  smith_apex_body: { skill: 'smithing', name: 'Apex Platebody', reqLvl: 82, xp: 375, baseTime: 4500, cost: { apex_bar: 5 }, reward: { apex_body: 1 } },
+
+  // NOVA (Level 85+)
+  smith_nova_helmet: { skill: 'smithing', name: 'Nova Helmet', reqLvl: 85, xp: 200, baseTime: 3120, cost: { nova_bar: 2 }, reward: { nova_helmet: 1 } },
+  smith_nova_legs: { skill: 'smithing', name: 'Nova Platelegs', reqLvl: 92, xp: 300, baseTime: 3780, cost: { nova_bar: 3 }, reward: { nova_legs: 1 } },
+  smith_nova_body: { skill: 'smithing', name: 'Nova Platebody', reqLvl: 96, xp: 500, baseTime: 4800, cost: { nova_bar: 5 }, reward: { nova_body: 1 } },
 
   // ==========================================
   // --- CRAFTING (Ranged Armor - Leather) ---
@@ -649,12 +650,10 @@ export const ACTIONS = {
   craft_leather_body: { skill: 'crafting', name: 'Leather Body', reqLvl: 14, xp: 48, baseTime: 2520, cost: { leather: 3 }, reward: { leather_body: 1 } },
 
   // GREEN LEATHER (Level 57+)
-  craft_green_cowl: { skill: 'crafting', name: 'Green Cowl', reqLvl: 57, xp: 62, baseTime: 1920, cost: { green_leather: 1 }, reward: { green_leather_cowl: 1 } },
   craft_green_chaps: { skill: 'crafting', name: 'Green Chaps', reqLvl: 60, xp: 124, baseTime: 2460, cost: { green_leather: 2 }, reward: { green_leather_chaps: 1 } },
   craft_green_body: { skill: 'crafting', name: 'Green Body', reqLvl: 63, xp: 186, baseTime: 3000, cost: { green_leather: 3 }, reward: { green_leather_body: 1 } },
 
   // BLACK LEATHER (Level 79+)
-  craft_black_cowl: { skill: 'crafting', name: 'Black Cowl', reqLvl: 79, xp: 86, baseTime: 2280, cost: { black_leather: 1 }, reward: { black_leather_cowl: 1 } },
   craft_black_chaps: { skill: 'crafting', name: 'Black Chaps', reqLvl: 82, xp: 172, baseTime: 2880, cost: { black_leather: 2 }, reward: { black_leather_chaps: 1 } },
   craft_black_body: { skill: 'crafting', name: 'Black Body', reqLvl: 84, xp: 258, baseTime: 3480, cost: { black_leather: 3 }, reward: { black_leather_body: 1 } },
 
@@ -663,18 +662,18 @@ export const ACTIONS = {
   // ==========================================
   // APPRENTICE (Silk)
   craft_apprentice_hat: { skill: 'crafting', name: 'Apprentice Hat', reqLvl: 10, xp: 20, baseTime: 1680, cost: { silk: 1 }, reward: { apprentice_hat: 1 } },
-  craft_apprentice_skirt: { skill: 'crafting', name: 'Apprentice Skirt', reqLvl: 13, xp: 40, baseTime: 2100, cost: { silk: 2 }, reward: { apprentice_skirt: 1 } },
-  craft_apprentice_robe: { skill: 'crafting', name: 'Apprentice Robe', reqLvl: 16, xp: 60, baseTime: 2520, cost: { silk: 3 }, reward: { apprentice_robe: 1 } },
+  craft_apprentice_bottom: { skill: 'crafting', name: 'Apprentice Bottom', reqLvl: 13, xp: 40, baseTime: 2100, cost: { silk: 2 }, reward: { apprentice_bottom: 1 } },
+  craft_apprentice_top: { skill: 'crafting', name: 'Apprentice Top', reqLvl: 16, xp: 60, baseTime: 2520, cost: { silk: 3 }, reward: { apprentice_top: 1 } },
 
   // WIZARD (Fine Cloth)
   craft_wizard_hat: { skill: 'crafting', name: 'Wizard Hat', reqLvl: 40, xp: 45, baseTime: 1920, cost: { fine_cloth: 1 }, reward: { wizard_hat: 1 } },
-  craft_wizard_skirt: { skill: 'crafting', name: 'Wizard Skirt', reqLvl: 43, xp: 90, baseTime: 2460, cost: { fine_cloth: 2 }, reward: { wizard_skirt: 1 } },
-  craft_wizard_robe: { skill: 'crafting', name: 'Wizard Robe', reqLvl: 46, xp: 135, baseTime: 3000, cost: { fine_cloth: 3 }, reward: { wizard_robe: 1 } },
+  craft_wizard_bottom: { skill: 'crafting', name: 'Wizard Bottom', reqLvl: 43, xp: 90, baseTime: 2460, cost: { fine_cloth: 2 }, reward: { wizard_bottom: 1 } },
+  craft_wizard_top: { skill: 'crafting', name: 'Wizard Top', reqLvl: 46, xp: 135, baseTime: 3000, cost: { fine_cloth: 3 }, reward: { wizard_top: 1 } },
 
   // MYSTIC (Mystic Cloth)
   craft_mystic_hat: { skill: 'crafting', name: 'Mystic Hat', reqLvl: 70, xp: 75, baseTime: 2280, cost: { mystic_cloth: 1 }, reward: { mystic_hat: 1 } },
-  craft_mystic_skirt: { skill: 'crafting', name: 'Mystic Skirt', reqLvl: 73, xp: 150, baseTime: 2880, cost: { mystic_cloth: 2 }, reward: { mystic_skirt: 1 } },
-  craft_mystic_robe: { skill: 'crafting', name: 'Mystic Robe', reqLvl: 76, xp: 225, baseTime: 3480, cost: { mystic_cloth: 3 }, reward: { mystic_robe: 1 } },
+  craft_mystic_bottom: { skill: 'crafting', name: 'Mystic Bottom', reqLvl: 73, xp: 150, baseTime: 2880, cost: { mystic_cloth: 2 }, reward: { mystic_bottom: 1 } },
+  craft_mystic_top: { skill: 'crafting', name: 'Mystic Top', reqLvl: 76, xp: 225, baseTime: 3480, cost: { mystic_cloth: 3 }, reward: { mystic_top: 1 } },
 
   // --- FISHING ---
   fish_shrimp: { skill: 'fishing', name: 'Shrimp', baseTime: 5100, xp: 15, reqLvl: 1, reward: { raw_shrimp: 1 } },

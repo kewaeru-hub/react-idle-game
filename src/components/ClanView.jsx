@@ -59,11 +59,8 @@ export default function ClanView({
       raw_shrimp: 'Raw Shrimp',
       cooked_shrimp: 'Cooked Shrimp',
       bones: 'Bones',
-      bronze_sword: 'Bronze Sword',
       bronze_scimitar: 'Bronze Scimitar',
-      shortbow: 'Shortbow',
       bronze_bow: 'Bronze Bow',
-      wooden_staff: 'Wooden Staff',
       bronze_staff: 'Bronze Staff',
       prayer_potion: 'Prayer Potion'
     };

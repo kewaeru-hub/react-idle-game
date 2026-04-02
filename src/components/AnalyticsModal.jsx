@@ -50,16 +50,33 @@ export default function AnalyticsModal({
     }
   });
 
-  // --- 2. MATH ---
+  // --- 2. MATH (OSRS-style) ---
   let accLevel = safeCombatStyle === 'ranged' ? skills.ranged?.level : safeCombatStyle === 'magic' ? skills.magic?.level : skills.attack?.level;
   let strLevel = safeCombatStyle === 'ranged' ? skills.ranged?.level : safeCombatStyle === 'magic' ? skills.magic?.level : skills.strength?.level;
 
-  let attBonus = ((accLevel || 1) + (weapon.att || 0)) * activeBuff;
-  let pMaxHit = Math.floor(((strLevel || 1) + (weapon.str || 0)) / 3) + 1;
-  pMaxHit = Math.floor(pMaxHit * activeBuff); 
+  const effectiveAttLevel = (accLevel || 1) + 8;
+  const equipAttBonus = Math.max(0, weapon.att || 0);
+  const attackRoll = effectiveAttLevel * (equipAttBonus + 64);
 
-  const enemyDef = isCombat && data.enemy ? data.enemy.def : 1;
-  const pHitChance = Math.min(95, Math.max(10, (attBonus / (attBonus + enemyDef)) * 100));
+  // Monster defence roll (OSRS style)
+  const enemyDefBonuses = isCombat && data.enemy?.defBonus ? data.enemy.defBonus : { melee: 0, ranged: 0, magic: 0 };
+  const monsterDefBonus = safeCombatStyle === 'ranged' ? (enemyDefBonuses.ranged || 0) : safeCombatStyle === 'magic' ? (enemyDefBonuses.magic || 0) : (enemyDefBonuses.melee || 0);
+  const defenceRoll = (monsterDefBonus + 9) * 64;
+
+  let pHitChance;
+  if (attackRoll > defenceRoll) {
+    pHitChance = (1 - (defenceRoll + 2) / (2 * (attackRoll + 1))) * 100;
+  } else {
+    pHitChance = (attackRoll / (2 * (defenceRoll + 1))) * 100;
+  }
+  pHitChance = Math.min(95, Math.max(5, pHitChance));
+
+  // OSRS max hit
+  const effectiveStrLevel = (strLevel || 1) + 8;
+  const strBonus = safeCombatStyle === 'ranged' ? 0 : (weapon.str || 0);
+  let pMaxHit = Math.max(1, Math.floor(0.5 + effectiveStrLevel * (strBonus + 64) / 640));
+  pMaxHit = Math.floor(pMaxHit * activeBuff);
+
   const pDps = isCombat && weapon.speedTicks > 0 ? (pHitChance / 100) * (pMaxHit / 2) / (weapon.speedTicks * 0.6) : 0;
 
   const timePerAction = isCombat && data.enemy ? weapon.speedTicks * 0.6 : (data.baseTime || 1800) / 1000;
@@ -72,13 +89,24 @@ export default function AnalyticsModal({
   const rtActionsPerHour = secondsElapsed > 0 ? (sessionStats.actionsCompleted / secondsElapsed) * 3600 : 0;
   const rtDps = secondsElapsed > 0 ? (sessionStats.xpGained / 4) / secondsElapsed : 0;
 
-  // --- 4. ENEMY ---
+  // --- 4. ENEMY (OSRS-style) ---
   let eHitChance = 0, eMaxHit = 0, eDps = 0;
   if (isCombat && data.enemy) {
-    eHitChance = Math.min(99, Math.max(1, (data.enemy.att / (data.enemy.att + (skills.defence?.level || 1))) * 100));
-    eMaxHit = data.enemy.str;
-    let block = data.enemy.type === 'melee' ? activeBlock.melee : data.enemy.type === 'range' ? activeBlock.range : activeBlock.mage;
-    eDps = (eHitChance / 100) * (eMaxHit / 2) / (data.enemy.speedTicks * 0.6) * block;
+    const monsterType = data.enemy.type || 'melee';
+    const offAtts = data.enemy.offAtt || { melee: 0, ranged: 0, magic: 0 };
+    const monsterAttBonus = monsterType === 'ranged' ? (offAtts.ranged || 0) : monsterType === 'magic' ? (offAtts.magic || 0) : (offAtts.melee || 0);
+    const eAttackRoll = (monsterAttBonus + 9) * 64;
+    const playerDefLevel = (skills.defence?.level || 1) + 8;
+    const eDefenceRoll = playerDefLevel * 64;
+    if (eAttackRoll > eDefenceRoll) {
+      eHitChance = (1 - (eDefenceRoll + 2) / (2 * (eAttackRoll + 1))) * 100;
+    } else {
+      eHitChance = (eAttackRoll / (2 * (eDefenceRoll + 1))) * 100;
+    }
+    eHitChance = Math.min(99, Math.max(1, eHitChance));
+    eMaxHit = Math.max(1, Math.floor(0.5 + (data.enemy.str + 8) * 64 / 640));
+    let block = monsterType === 'melee' ? activeBlock.melee : monsterType === 'range' || monsterType === 'ranged' ? activeBlock.range : activeBlock.mage;
+    eDps = (eHitChance / 100) * (eMaxHit / 2) / ((data.enemy.speedTicks || 4) * 0.6) * block;
   }
 
   return (

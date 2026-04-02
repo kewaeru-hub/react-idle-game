@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import useCombatEngine from './useCombatEngine';
 import { getActivePet } from '../utils/gameHelpers';
-import { PRAYER_BOOK } from '../data/gameData';
+import { PRAYER_BOOK, ARMOR, AMMO } from '../data/gameData';
 
 export function useCombat(
   activeAction,
@@ -24,7 +24,11 @@ export function useCombat(
 
   // Keep a ref to combatStyle so callbacks always read the latest value
   const combatStyleRef = useRef(combatStyle);
-  useEffect(() => { combatStyleRef.current = combatStyle; }, [combatStyle]);
+  useEffect(() => {
+    combatStyleRef.current = combatStyle;
+    // Update the engine entity so OSRS accuracy/max hit uses the correct style
+    engine.updateAlly('player', { combatStyle });
+  }, [combatStyle]);
 
   // === Combat Log ===
   const combatLogRef = useRef([]);
@@ -42,17 +46,36 @@ export function useCombat(
   // === seedCombat: The entry point to start a fight ===
   const seedCombat = (actionId, waveMonsters = null, appCallbacks = null) => {
     const weapon = getCurrentWeapon() || {};
-    const accLevel = combatStyle === 'ranged' ? (skills.ranged?.level || 1) : combatStyle === 'magic' ? (skills.magic?.level || 1) : (skills.attack?.level || 1);
-    const strLevel = combatStyle === 'ranged' ? (skills.ranged?.level || 1) : combatStyle === 'magic' ? (skills.magic?.level || 1) : (skills.strength?.level || 1);
     const agilityLevel = skills.agility?.level || 1;
-    const dodgeChance = agilityLevel * 0.002; // 0.2% per level = 0.002
+    const dodgeChance = agilityLevel * 0.002; // 0.2% per level
+
+    // Calculate armor bonuses from all equipped armor pieces
+    const armorSlots = ['head', 'body', 'legs', 'shield'];
+    let armorAccuracy = 0, armorRangedAcc = 0, armorMagicAcc = 0;
+    let armorDefence = 0, armorRangedDef = 0, armorMagicDef = 0;
+    armorSlots.forEach(slot => {
+      const armorId = equipment?.[slot];
+      const armor = armorId ? ARMOR[armorId] : null;
+      if (armor) {
+        armorAccuracy += armor.accuracy || 0;
+        armorRangedAcc += armor.rangedAcc || 0;
+        armorMagicAcc += armor.magicAcc || 0;
+        armorDefence += armor.defence || 0;
+        armorRangedDef += armor.rangedDef || 0;
+        armorMagicDef += armor.magicDef || 0;
+      }
+    });
+
+    // Get ammo rangedStr
+    const ammoId = equipment?.ammo;
+    const ammoRangedStr = ammoId ? (AMMO[ammoId]?.rangedStr || 0) : 0;
 
     // Check if we're on a slayer task and have the slayer pet equipped
     let slayerBonus = 1.0;
     if (slayerTask) {
       const activePet = getActivePet(equipment);
       if (activePet && activePet.perk === 'slayerBonus') {
-        slayerBonus = 1 + (activePet.perkValue || 0.05); // Default 5% bonus
+        slayerBonus = 1 + (activePet.perkValue || 0.05);
       }
     }
     engine.setSlayerBonus(slayerBonus);
@@ -67,10 +90,17 @@ export function useCombat(
       name: 'Player',
       hp: currentHp,
       maxHp: playerStats?.maxHp || 10,
-      att: accLevel,
-      str: strLevel,
+      combatStyle: combatStyle,
+      attackLevel: skills.attack?.level || 1,
+      strengthLevel: skills.strength?.level || 1,
+      defenceLevel: skills.defence?.level || 1,
+      rangedLevel: skills.ranged?.level || 1,
+      magicLevel: skills.magic?.level || 1,
       weaponAtt: weapon.att || 0,
       weaponStr: weapon.str || 0,
+      ammoRangedStr: ammoRangedStr,
+      armorAccuracy, armorRangedAcc, armorMagicAcc,
+      armorDefence, armorRangedDef, armorMagicDef,
       attackSpeedTicks: weapon.speedTicks || 4,
       currentTickCount: 0,
       dodgeChance: dodgeChance
@@ -83,9 +113,9 @@ export function useCombat(
         name: m.name,
         hp: m.hp || m.currentHp || 1,
         maxHp: m.hp || m.currentHp || 1,
-        att: m.offensiveStats?.attack || m.att || 1,
-        str: m.offensiveStats?.attack || m.str || 1,
-        def: m.def || 0,
+        str: m.str || 1,
+        offAtt: m.offAtt || { melee: m.offensiveStats?.attack || 0, ranged: m.offensiveStats?.ranged || 0, magic: m.offensiveStats?.magic || 0 },
+        defBonus: m.defBonus || { melee: m.def || 0, ranged: m.def || 0, magic: m.def || 0 },
         attackSpeedTicks: m.attackSpeed || m.speedTicks || 4,
         currentTickCount: 0,
         type: m.type
@@ -98,9 +128,9 @@ export function useCombat(
         name: ACTIONS[actionId]?.name || e.name || 'Enemy',
         hp: e.hp,
         maxHp: e.hp,
-        att: e.att || 1,
         str: e.str || 1,
-        def: e.def || 0,
+        offAtt: e.offAtt || { melee: e.att || 1, ranged: 0, magic: 0 },
+        defBonus: e.defBonus || { melee: e.def || 0, ranged: e.def || 0, magic: e.def || 0 },
         attackSpeedTicks: e.speedTicks || 4,
         currentTickCount: 0,
         type: e.type

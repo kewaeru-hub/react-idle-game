@@ -18,18 +18,19 @@ export function useFightCave(combat, setInventory, stopAction, setPlayerPrayer, 
     for (const monsterGroup of waveData.monsters) {
       for (let i = 0; i < monsterGroup.count; i++) {
         const monsterType = monsterGroup.type;
-        const monsterStats = fightCaveMonsters[monsterType] || { hp: 1, attackSpeed: 5, def: 0, offensiveStats: { attack: 1, magic: 1, ranged: 1 }};
+        const monsterStats = fightCaveMonsters[monsterType] || { hp: 1, attackSpeed: 5, str: 1, offAtt: { melee: 1, ranged: 0, magic: 0 }, defBonus: { melee: 0, ranged: 0, magic: 0 }, type: 'melee' };
         const displayName = monsterType === 'prayer-eater' ? 'Blub' : monsterType === 'zed' ? 'Zak' : (monsterType.charAt(0).toUpperCase() + monsterType.slice(1));
         waveMonsters.push({
           name: displayName,
-          type: monsterType,
+          type: monsterStats.type || monsterType,
           hp: monsterStats.hp,
           maxHp: monsterStats.hp,
           currentHp: monsterStats.hp,
           attackSpeed: monsterStats.attackSpeed,
           currentEnemyTick: 0,
-          def: monsterStats.def,
-          offensiveStats: monsterStats.offensiveStats
+          str: monsterStats.str || 1,
+          offAtt: monsterStats.offAtt || { melee: 0, ranged: 0, magic: 0 },
+          defBonus: monsterStats.defBonus || { melee: 0, ranged: 0, magic: 0 }
         });
         monsterCounter++;
       }

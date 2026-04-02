@@ -3,52 +3,35 @@
 const monsters = {
     "prayer-eater": {
         hp: 3,
-        def: 0,
-        offensiveStats: {
-            attack: 1,
-            magic: 1,
-            ranged: 1
-        },
-        att: 999,
-        minHit: 5,
-        maxHit: 5,
-        attackSpeed: 3
+        str: 2,
+        offAtt: { melee: 1, ranged: 0, magic: 0 },
+        defBonus: { melee: 0, ranged: 0, magic: 0 },
+        attackSpeed: 3,
+        type: 'melee'
     },
     "archer": {
         hp: 5,
-        def: 0,
-        offensiveStats: {
-            attack: 5,
-            magic: 1,
-            ranged: 5
-        },
-        att: 999,
-        minHit: 5,
-        maxHit: 5,
-        attackSpeed: 3
+        str: 3,
+        offAtt: { melee: 0, ranged: 5, magic: 0 },
+        defBonus: { melee: 2, ranged: 2, magic: 0 },
+        attackSpeed: 3,
+        type: 'ranged'
     },
     "mage": {
         hp: 7,
-        def: 0,
-        offensiveStats: {
-            attack: 1,
-            magic: 5,
-            ranged: 1
-        },
-        att: 999,
-        minHit: 5,
-        maxHit: 5,
-        attackSpeed: 4
+        str: 4,
+        offAtt: { melee: 0, ranged: 0, magic: 5 },
+        defBonus: { melee: 1, ranged: 1, magic: 5 },
+        attackSpeed: 4,
+        type: 'magic'
     },
     "zed": {
         hp: 12,
-        def: 0,
-        offensiveStats: {
-            attack: 1,
-            magic: 1,
-            ranged: 1
-        },
-        attackSpeed: 2
+        str: 8,
+        offAtt: { melee: 8, ranged: 0, magic: 0 },
+        defBonus: { melee: 5, ranged: 3, magic: 2 },
+        attackSpeed: 2,
+        type: 'melee'
     }
 };
 

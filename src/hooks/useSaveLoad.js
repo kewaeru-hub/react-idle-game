@@ -3,7 +3,7 @@ import { calculateOfflineProgress } from '../utils/offlineProgress';
 
 const SAVE_KEY = 'idleScape_save_v1';
 
-export function useSaveLoad(skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clan, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder) {
+export function useSaveLoad(skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clan, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, monsterStatsRef, setMonsterStats) {
   // A. Laden bij opstarten (draait 1 keer)
   useEffect(() => {
     const savedData = localStorage.getItem(SAVE_KEY);
@@ -34,6 +34,7 @@ export function useSaveLoad(skillsRef, inventoryRef, equipment, combatStyle, qui
         if (parsed.toolboxes && setToolboxes) setToolboxes(parsed.toolboxes);
         if (parsed.clan && setClan) setClan(parsed.clan);
         if (parsed.inventoryOrder && setInventoryOrder) setInventoryOrder(parsed.inventoryOrder);
+        if (parsed.monsterStats && setMonsterStats) setMonsterStats(parsed.monsterStats);
         if (parsed.market) {
           if (parsed.market.marketOffers && setMarketOffers) setMarketOffers(parsed.market.marketOffers);
           if (parsed.market.marketSlots && setMarketSlots) setMarketSlots(parsed.market.marketSlots);
@@ -100,6 +101,7 @@ export function useSaveLoad(skillsRef, inventoryRef, equipment, combatStyle, qui
         claimedTools,
         toolboxes,
         inventoryOrder: inventoryOrderRef?.current || [],
+        monsterStats: monsterStatsRef?.current || {},
         clan,
         market: marketRef?.current || null,
         lastSaveTimestamp: Date.now(),

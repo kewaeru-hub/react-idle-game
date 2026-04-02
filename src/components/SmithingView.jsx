@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { ITEM_IMAGES } from '../data/gameData';
 
+const ARMOR_TIERS = ['Bronze', 'Iron', 'Steel', 'Alloy', 'Apex', 'Nova'];
+
 export default function SmithingView({ ACTIONS, skills, inventory, startAction, currentAction }) {
   const [activeTab, setActiveTab] = useState('Bars');
+  const [armorSubTab, setArmorSubTab] = useState('Bronze');
 
   // Filter alle Smithing acties
   const smithingActions = Object.entries(ACTIONS).filter(([_, data]) => data.skill === 'smithing');
@@ -14,6 +17,13 @@ export default function SmithingView({ ACTIONS, skills, inventory, startAction, 
     return 'Weapons'; // Alles wat geen bar of armor is, is een wapen (swords, daggers etc)
   };
 
+  const getArmorTier = (actionKey) => {
+    for (const tier of ARMOR_TIERS) {
+      if (actionKey.includes(`_${tier.toLowerCase()}_`)) return tier;
+    }
+    return 'Other';
+  };
+
   // Groepeer de acties
   const groupedActions = { Bars: [], Weapons: [], Armor: [] };
   smithingActions.forEach(([key, action]) => {
@@ -22,16 +32,21 @@ export default function SmithingView({ ACTIONS, skills, inventory, startAction, 
     if (groupedActions[category]) groupedActions[category].push([key, action]);
   });
 
+  // Filter armor by sub-tab when Armor tab is active
+  const displayActions = activeTab === 'Armor'
+    ? groupedActions['Armor'].filter(([key]) => getArmorTier(key) === armorSubTab)
+    : groupedActions[activeTab];
+
   return (
     <div className="skill-view">
       <h2 style={{ color: '#fff', borderBottom: '2px solid #208b76', paddingBottom: '10px', marginBottom: '20px' }}>Smithing (Lv. {skills.smithing.level})</h2>
       
-      {/* Tabs Menu */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+      {/* Main Tabs */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: activeTab === 'Armor' ? '10px' : '20px' }}>
         {Object.keys(groupedActions).map(tab => (
           <button 
             key={tab} 
-            onClick={() => setActiveTab(tab)}
+            onClick={() => { setActiveTab(tab); if (tab === 'Armor') setArmorSubTab('Bronze'); }}
             style={{ 
               padding: '8px 16px', backgroundColor: activeTab === tab ? '#208b76' : '#111920', 
               color: '#fff', border: '1px solid #2a3b4c', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' 
@@ -42,9 +57,34 @@ export default function SmithingView({ ACTIONS, skills, inventory, startAction, 
         ))}
       </div>
 
+      {/* Armor Tier Sub-Tabs */}
+      {activeTab === 'Armor' && (
+        <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', flexWrap: 'wrap' }}>
+          {ARMOR_TIERS.map(tier => (
+            <button 
+              key={tier} 
+              onClick={() => setArmorSubTab(tier)}
+              style={{ 
+                padding: '5px 12px', 
+                backgroundColor: armorSubTab === tier ? '#2a3b4c' : 'transparent', 
+                color: armorSubTab === tier ? '#4affd4' : '#7b95a6',
+                border: armorSubTab === tier ? '1px solid #4affd4' : '1px solid #1a2a3a', 
+                borderRadius: '4px', 
+                cursor: 'pointer', 
+                fontSize: '12px',
+                fontWeight: armorSubTab === tier ? 'bold' : 'normal',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {tier}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Acties Grid */}
       <div className="skilling-action-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-        {groupedActions[activeTab].map(([key, action]) => {
+        {displayActions.map(([key, action]) => {
           const isUnlocked = skills.smithing.level >= action.reqLvl;
           const isDoing = currentAction === key;
           

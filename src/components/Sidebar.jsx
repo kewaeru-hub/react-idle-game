@@ -1,6 +1,7 @@
 import React from 'react';
 
-export default function Sidebar({ screen, setScreen, skills }) {
+export default function Sidebar({ screen, setScreen, skills, activeAction, ACTIONS }) {
+  const isCombatActive = activeAction && ACTIONS?.[activeAction]?.skill === 'combat' && screen === 'combat';
   const SKILLS = [
     { id: 'combat',     icon: '⚔️' },
     { id: 'prayer',     icon: '🙏' },
@@ -20,7 +21,7 @@ export default function Sidebar({ screen, setScreen, skills }) {
   ];
 
   return (
-    <div className="sidebar-wrapper">
+    <div className={`sidebar-wrapper ${isCombatActive ? 'hide-in-combat' : ''}`}>
       <div className="sidebar-label">Skill Hub</div>
       <nav className="sidebar sidebar-view-text">
         {SKILLS.map(({ id, icon }) => {

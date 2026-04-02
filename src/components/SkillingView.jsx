@@ -171,28 +171,7 @@ export default function SkillingView({
     const isClaimed = claimedTools[screen];
 
     if (!isClaimed) {
-      return (
-        <div style={{ backgroundColor: '#1a3a2d', border: '2px solid #4affd4', borderRadius: '6px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '180px', height: 'fit-content' }}>
-          <h4 style={{ color: '#4affd4', margin: '0', fontSize: '13px' }}>🧰 Free Tool</h4>
-          <p style={{ color: '#7b95a6', margin: 0, fontSize: '11px' }}>Claim a free bronze {skillData.name} tool</p>
-          <button
-            onClick={() => claimToolCallback && claimToolCallback(screen)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              backgroundColor: '#4affd4',
-              color: '#000',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '11px'
-            }}
-          >
-            Claim
-          </button>
-        </div>
-      );
+      return null;
     }
 
     const level = box?.level || 0;
@@ -550,24 +529,58 @@ export default function SkillingView({
                 )}
 
                 <h3 className="action-card-name" style={{ margin: '0 0 8px 0', fontSize: '18px', color: '#fff' }}>{data.name}</h3>
-                <p className="action-card-meta" style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#7b95a6' }}>Level requirement: {data.reqLvl}</p>
-                <p className="action-card-meta" style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#c5d3df' }}>
-                  {data.xp} XP / {actionTimeSecs} Seconds
-                </p>
+                {!data.enemy && (
+                  <>
+                    <p className="action-card-meta" style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#7b95a6' }}>Level requirement: {data.reqLvl}</p>
+                    <p className="action-card-meta" style={{ margin: '0 0 15px 0', fontSize: '12px', color: '#c5d3df' }}>
+                      {data.xp} XP / {actionTimeSecs} Seconds
+                    </p>
+                  </>
+                )}
 
-                <div className="action-card-icon-area" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', filter: hasLevel ? 'none' : 'grayscale(100%) opacity(0.5)' }}>
-                  {rewardKey && ITEM_IMAGES[rewardKey] ? (
-                    <ItemTooltip itemKey={rewardKey} count={qty}>
-                      <img className="action-card-img" src={ITEM_IMAGES[rewardKey]} alt={rewardKey} style={{ maxHeight: '80px', maxWidth: '80px', objectFit: 'contain' }} />
-                    </ItemTooltip>
-                  ) : (
-                    <span style={{ fontSize: '32px' }}>
-                      {data.skill === 'mining' ? '🪨' : data.skill === 'woodcutting' ? '🌲' : data.skill === 'fishing' ? '🐟' : data.skill === 'smithing' ? '🔨' : data.skill === 'crafting' ? '🎨' : '📦'}
-                    </span>
-                  )}
-                </div>
+                {data.enemy && data.enemy.offAtt ? (
+                  <div style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', filter: hasLevel ? 'none' : 'grayscale(100%) opacity(0.5)' }}>
+                    {/* Monster image centered */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {rewardKey && ITEM_IMAGES[rewardKey] ? (
+                        <ItemTooltip itemKey={rewardKey} count={qty}>
+                          <img className="action-card-img" src={ITEM_IMAGES[rewardKey]} alt={rewardKey} style={{ maxHeight: '70px', maxWidth: '70px', objectFit: 'contain' }} />
+                        </ItemTooltip>
+                      ) : (
+                        <span style={{ fontSize: '32px' }}>📦</span>
+                      )}
+                    </div>
+                    {/* Stats bottom-right overlay */}
+                    <div style={{ position: 'absolute', bottom: '14px', right: '8px', display: 'flex', flexDirection: 'column', gap: '1px', fontSize: '9px', lineHeight: '1.2', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '4px', color: '#c5d3df', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <span style={{ fontSize: '8px' }}>⚔️</span>
+                        <span title="Melee" style={{ color: '#e74c3c' }}>🗡️{data.enemy.offAtt.melee}</span>
+                        <span title="Ranged" style={{ color: '#e74c3c' }}>🏹{data.enemy.offAtt.ranged}</span>
+                        <span title="Magic" style={{ color: '#e74c3c' }}>🔮{data.enemy.offAtt.magic}</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '4px', color: '#c5d3df', justifyContent: 'flex-end', alignItems: 'center' }}>
+                        <span style={{ fontSize: '8px' }}>🛡️</span>
+                        <span title="Melee Def" style={{ color: '#3498db' }}>🗡️{data.enemy.defBonus.melee}</span>
+                        <span title="Ranged Def" style={{ color: '#3498db' }}>🏹{data.enemy.defBonus.ranged}</span>
+                        <span title="Magic Def" style={{ color: '#3498db' }}>🔮{data.enemy.defBonus.magic}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="action-card-icon-area" style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', filter: hasLevel ? 'none' : 'grayscale(100%) opacity(0.5)' }}>
+                    {rewardKey && ITEM_IMAGES[rewardKey] ? (
+                      <ItemTooltip itemKey={rewardKey} count={qty}>
+                        <img className="action-card-img" src={ITEM_IMAGES[rewardKey]} alt={rewardKey} style={{ maxHeight: '80px', maxWidth: '80px', objectFit: 'contain' }} />
+                      </ItemTooltip>
+                    ) : (
+                      <span style={{ fontSize: '32px' }}>
+                        {data.skill === 'mining' ? '🪨' : data.skill === 'woodcutting' ? '🌲' : data.skill === 'fishing' ? '🐟' : data.skill === 'smithing' ? '🔨' : data.skill === 'crafting' ? '🎨' : '📦'}
+                      </span>
+                    )}
+                  </div>
+                )}
 
-                {rewardKey && (
+                {rewardKey && !data.enemy && (
                   <div className="action-card-qty" style={{ position: 'absolute', bottom: '15px', right: '15px', fontSize: '12px', color: '#fff', fontWeight: 'bold' }}>
                     Qty: {qty >= 1000 ? (qty/1000).toFixed(1) + 'k' : qty}
                   </div>

@@ -69,7 +69,7 @@ export function useClan() {
         ...fakeMembers
       ],
       vault: [
-        { id: 'bronze_sword', name: 'Bronze Sword', amount: 5 },
+        { id: 'bronze_scimitar', name: 'Bronze Scimitar', amount: 5 },
         { id: 'raw_shrimp', name: 'Raw Shrimp', amount: 127 },
         { id: 'prayer_potion', name: 'Prayer Potion', amount: 8 }
       ],
@@ -183,11 +183,8 @@ export function useClan() {
         const itemNames = {
           raw_shrimp: 'Raw Shrimp',
           cooked_shrimp: 'Cooked Shrimp',
-          bronze_sword: 'Bronze Sword',
           bronze_scimitar: 'Bronze Scimitar',
-          shortbow: 'Shortbow',
           bronze_bow: 'Bronze Bow',
-          wooden_staff: 'Wooden Staff',
           bronze_staff: 'Bronze Staff',
           prayer_potion: 'Prayer Potion',
           bones: 'Bones',

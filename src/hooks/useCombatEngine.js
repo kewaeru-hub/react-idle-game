@@ -1,24 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 
-// Damage calculation. Read prayers from ref to avoid stale closures.
+// OSRS-style damage calculation.
+// Attack Roll vs Defence Roll → Hit Chance → Max Hit → Damage
 // Returns { damage, baseDamage, prayerBonus, prayerBlocked }
 function computeDamage(attacker, defender, prayersRef, slayerBonus = 1.0, isPlayerAttack = false, attackerType = 'melee') {
   const activePrayers = prayersRef.current || {};
   const MISS = { damage: 0, baseDamage: 0, prayerBonus: 0, prayerBlocked: 0 };
 
-  // Determine prayer effects
+  // --- Prayer effects ---
   let offensiveBuff = 1.0;
   let defensiveMult = 1.0;
 
   if (isPlayerAttack) {
-    // Offensive prayer: boost player damage
     const offEntry = Object.entries(activePrayers).find(([pid]) => pid.startsWith('dmg_'));
     if (offEntry) {
       const val = offEntry[1];
       offensiveBuff = (typeof val === 'object' && val.buff) ? val.buff : 1.15;
     }
   } else {
-    // Defensive prayer: reduce incoming damage (must match attacker type)
     const typeMap = { melee: 'melee_def', ranged: 'range_def', range: 'range_def', magic: 'mage_def' };
     const defType = typeMap[attackerType] || '';
     if (defType) {
@@ -34,29 +33,113 @@ function computeDamage(attacker, defender, prayersRef, slayerBonus = 1.0, isPlay
     }
   }
 
-  const attackerAtt = (attacker.att || 0) + (attacker.weaponAtt || 0);
-  const attackerStr = (attacker.str || 0) + (attacker.weaponStr || 0);
-  const defenderDef = defender.def || defender.defence || 0;
+  // --- OSRS Accuracy: Attack Roll vs Defence Roll ---
+  let attackRoll, defenceRoll;
 
-  const attBonus = Math.max(1, attackerAtt);
-  const defBonus = Math.max(1, defenderDef);
-  const hitChance = Math.min(0.95, Math.max(0.05, attBonus / (attBonus + defBonus * 1.2)));
-  if (Math.random() >= hitChance) return MISS; // Miss
+  if (isPlayerAttack) {
+    // Player attacks monster
+    const style = attacker.combatStyle || 'attack';
+    let accLevel, equipAttBonus;
 
-  // Agility dodge check (defender only if player)
-  if (defender.dodgeChance && defender.dodgeChance > 0) {
-    if (Math.random() < defender.dodgeChance) return MISS; // Dodged!
+    if (style === 'ranged') {
+      accLevel = attacker.rangedLevel || attacker.att || 1;
+      equipAttBonus = (attacker.weaponAtt || 0) + (attacker.armorRangedAcc || 0);
+    } else if (style === 'magic') {
+      accLevel = attacker.magicLevel || attacker.att || 1;
+      equipAttBonus = (attacker.weaponAtt || 0) + (attacker.armorMagicAcc || 0);
+    } else {
+      // melee (attack/strength/defence styles)
+      accLevel = attacker.attackLevel || attacker.att || 1;
+      equipAttBonus = (attacker.weaponAtt || 0) + (attacker.armorAccuracy || 0);
+    }
+
+    const effectiveAttLevel = accLevel + 8;
+    attackRoll = effectiveAttLevel * (Math.max(0, equipAttBonus) + 64);
+
+    // Monster defence roll — defBonus acts as combined level+bonus
+    const defBonuses = defender.defBonus || { melee: defender.def || 0, ranged: defender.def || 0, magic: defender.def || 0 };
+    let monsterDefBonus;
+    if (style === 'ranged') monsterDefBonus = defBonuses.ranged || 0;
+    else if (style === 'magic') monsterDefBonus = defBonuses.magic || 0;
+    else monsterDefBonus = defBonuses.melee || 0;
+
+    defenceRoll = (monsterDefBonus + 9) * 64;
+
+  } else {
+    // Monster attacks player
+    const monsterType = attacker.type || 'melee';
+    const offAtts = attacker.offAtt || { melee: attacker.att || 1, ranged: 0, magic: 0 };
+    let monsterAttBonus;
+    if (monsterType === 'ranged' || monsterType === 'range') monsterAttBonus = offAtts.ranged || 0;
+    else if (monsterType === 'magic') monsterAttBonus = offAtts.magic || 0;
+    else monsterAttBonus = offAtts.melee || 0;
+
+    attackRoll = (monsterAttBonus + 9) * 64;
+
+    // Player defence roll — uses defence level + armor bonuses
+    const playerDefLevel = defender.defenceLevel || defender.def || 1;
+    const effectiveDefLevel = playerDefLevel + 8;
+    let equipDefBonus;
+    if (monsterType === 'ranged' || monsterType === 'range') equipDefBonus = defender.armorRangedDef || 0;
+    else if (monsterType === 'magic') equipDefBonus = defender.armorMagicDef || 0;
+    else equipDefBonus = defender.armorDefence || 0;
+
+    defenceRoll = effectiveDefLevel * (Math.max(0, equipDefBonus) + 64);
   }
 
-  const baseMaxHit = Math.max(1, Math.floor(attackerStr / 6) + Math.floor((attacker.weaponStr || 0) / 4));
-  const rawHit = Math.floor(Math.random() * baseMaxHit + 1);
+  // --- OSRS Hit Chance ---
+  let hitChance;
+  if (attackRoll > defenceRoll) {
+    hitChance = 1 - (defenceRoll + 2) / (2 * (attackRoll + 1));
+  } else {
+    hitChance = attackRoll / (2 * (defenceRoll + 1));
+  }
+  hitChance = Math.min(0.95, Math.max(0.05, hitChance));
+
+  if (Math.random() >= hitChance) return MISS;
+
+  // Agility dodge check (player defending only)
+  if (!isPlayerAttack && defender.dodgeChance && defender.dodgeChance > 0) {
+    if (Math.random() < defender.dodgeChance) return MISS;
+  }
+
+  // --- OSRS Max Hit ---
+  let maxHit;
+  if (isPlayerAttack) {
+    const style = attacker.combatStyle || 'attack';
+    let strLevel, strBonus;
+
+    if (style === 'ranged') {
+      strLevel = attacker.rangedLevel || 1;
+      strBonus = attacker.ammoRangedStr || 0;
+    } else if (style === 'magic') {
+      strLevel = attacker.magicLevel || 1;
+      strBonus = attacker.weaponStr || 0;
+    } else {
+      // melee
+      strLevel = attacker.strengthLevel || attacker.str || 1;
+      strBonus = attacker.weaponStr || 0;
+    }
+
+    const effectiveStrLevel = strLevel + 8;
+    maxHit = Math.max(1, Math.floor(0.5 + effectiveStrLevel * (strBonus + 64) / 640));
+  } else {
+    // Monster max hit — derived from str stat
+    const monsterStr = attacker.str || 1;
+    maxHit = Math.max(1, Math.floor(0.5 + (monsterStr + 8) * 64 / 640));
+  }
+
+  // --- Roll damage + apply prayer & slayer ---
+  const rawHit = Math.floor(Math.random() * maxHit) + 1;
   const withSlayer = Math.floor(rawHit * slayerBonus);
-  const finalDmg = Math.max(0, Math.floor(withSlayer * offensiveBuff * defensiveMult));
+  const withPrayer = isPlayerAttack
+    ? Math.floor(withSlayer * offensiveBuff)
+    : Math.max(0, Math.floor(withSlayer * defensiveMult));
 
-  const prayerBonus = isPlayerAttack && offensiveBuff > 1.0 ? Math.max(0, finalDmg - withSlayer) : 0;
-  const prayerBlocked = !isPlayerAttack && defensiveMult < 1.0 ? Math.max(0, withSlayer - finalDmg) : 0;
+  const prayerBonus = isPlayerAttack && offensiveBuff > 1.0 ? Math.max(0, withPrayer - withSlayer) : 0;
+  const prayerBlocked = !isPlayerAttack && defensiveMult < 1.0 ? Math.max(0, withSlayer - withPrayer) : 0;
 
-  return { damage: finalDmg, baseDamage: withSlayer, prayerBonus, prayerBlocked };
+  return { damage: withPrayer, baseDamage: withSlayer, prayerBonus, prayerBlocked };
 }
 
 export default function useCombatEngine() {

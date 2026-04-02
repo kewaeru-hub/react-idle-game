@@ -8,7 +8,7 @@ export default function CombatView({
   combatState, prayers = {}, prayerQueue, togglePrayer, eatFood, drinkPotion, 
   getItemCount, stopAction, getCurrentWeapon, xpDrops = [], quickPrayers = [],
   combatStyle, setCombatStyle, availableCombatStyles, equipment, WEAPONS, ARMOR, AMMO,
-  slayerTask, combatLog = []
+  slayerTask, combatLog = [], setScreen
 }) {
   const data = ACTIONS[activeAction];
   const weapon = getCurrentWeapon() || { speedTicks: 5 };
@@ -128,7 +128,10 @@ export default function CombatView({
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
           <h3 style={{ margin: 0 }}>👤 Player</h3>
-          <button className="btn-stop" onClick={stopAction}>✕</button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button className="btn-stop" onClick={() => setScreen && setScreen('profile')} title="Back to Profile">←</button>
+            <button className="btn-stop" onClick={stopAction}>✕</button>
+          </div>
         </div>
 
         {/* COMBAT STYLE SELECTOR */}
