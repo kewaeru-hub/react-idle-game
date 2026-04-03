@@ -30,7 +30,10 @@ export default function ClanView({
   reviewJoinRequest,
   user,
   clanJoinRequests,
-  loadJoinRequests
+  loadJoinRequests,
+  checkPendingInvites,
+  acceptInvite,
+  declineInvite
 }) {
   const [createClanName, setCreateClanName] = useState('');
   const [joinClanName, setJoinClanName] = useState('');
@@ -40,6 +43,14 @@ export default function ClanView({
   const [joinLoading, setJoinLoading] = useState(false);
   const [invitePlayerName, setInvitePlayerName] = useState('');
   const [recruitmentMessage, setRecruitmentMessage] = useState(clan?.recruitment?.message || 'Welcome to our clan!');
+  const [pendingInvites, setPendingInvites] = useState([]);
+  
+  // Load pending invites when not in a clan
+  useEffect(() => {
+    if (!clan && checkPendingInvites) {
+      checkPendingInvites().then(invites => setPendingInvites(invites || []));
+    }
+  }, [clan, checkPendingInvites]);
   
   // Vault deposit modal
   const [selectedVaultItem, setSelectedVaultItem] = useState(null);
@@ -151,6 +162,58 @@ export default function ClanView({
               <div className="clan-benefit-desc">Unlock XP boosts, drop bonuses, and more. (Coming Soon)</div>
             </div>
           </div>
+
+          {/* Pending Invites */}
+          {pendingInvites.length > 0 && (
+            <div style={{ 
+              margin: '20px 0', 
+              padding: '16px', 
+              background: 'rgba(102, 252, 241, 0.05)', 
+              border: '1px solid rgba(102, 252, 241, 0.3)', 
+              borderRadius: '12px' 
+            }}>
+              <h3 style={{ marginTop: 0, color: '#66FCF1', marginBottom: '12px' }}>📩 Clan Invites</h3>
+              {pendingInvites.map(invite => (
+                <div key={invite.id} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '12px', marginBottom: '8px'
+                }}>
+                  <div>
+                    <span style={{ fontWeight: 600, color: '#F1FAEE' }}>{invite.clanName}</span>
+                    <span style={{ fontSize: '12px', color: '#8899aa', marginLeft: '8px' }}>
+                      invited you · {new Date(invite.requested_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn-action"
+                      onClick={async () => {
+                        if (await acceptInvite(invite.id, invite.clan_id)) {
+                          setPendingInvites(prev => prev.filter(i => i.id !== invite.id));
+                        }
+                      }}
+                      style={{ padding: '6px 16px', fontSize: '12px' }}
+                    >
+                      ✅ Accept
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (await declineInvite(invite.id)) {
+                          setPendingInvites(prev => prev.filter(i => i.id !== invite.id));
+                        }
+                      }}
+                      style={{ 
+                        padding: '6px 16px', fontSize: '12px', background: 'rgba(255,23,68,0.15)',
+                        border: '1px solid rgba(255,23,68,0.4)', color: '#ff1744', borderRadius: '6px', cursor: 'pointer'
+                      }}
+                    >
+                      ❌ Decline
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Action Boxes */}
           <div className="clan-actions">
@@ -859,8 +922,8 @@ export default function ClanView({
                   color: '#fff', marginBottom: '12px'
                 }}
               />
-              <button className="btn-action" onClick={() => {
-                if (inviteMember(invitePlayerName)) setInvitePlayerName('');
+              <button className="btn-action" onClick={async () => {
+                if (await inviteMember(invitePlayerName)) setInvitePlayerName('');
               }} style={{ width: '100%' }}>
                 Send Invite
               </button>

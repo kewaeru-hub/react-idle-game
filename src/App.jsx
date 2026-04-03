@@ -40,6 +40,8 @@ import { useShop } from './hooks/useShop';
 import { useCloudSave } from './hooks/useCloudSave';
 import { useFightCave } from './hooks/useFightCave';
 import { useClan } from './hooks/useClan';
+import { useChat } from './hooks/useChat';
+import ChatPanel from './components/ChatPanel';
 import { useMarket } from './hooks/useMarket';
 import { useSlayer } from './hooks/useSlayer';
 import { useQuests } from './hooks/useQuests';
@@ -67,10 +69,11 @@ export default function App({ user, signOut }) {
   // Refs
   const inventoryRef = useRef(inventory);
   const autoEatThresholdRef = useRef(autoEatThreshold);
+  const skillsRef = useRef(null);
   useEffect(() => { autoEatThresholdRef.current = autoEatThreshold; }, [autoEatThreshold]);
 
   const { equipment, setEquipment, equipmentAmounts, setEquipmentAmounts, toggleEquip } = useEquipment(
-    { weapon: null }, { ammo: 0 }, inventoryRef, setInventory, setCombatStyle
+    { weapon: null }, { ammo: 0 }, inventoryRef, setInventory, setCombatStyle, skillsRef
   );
 
   const [slayerTask, setSlayerTask] = useState(null);
@@ -538,7 +541,6 @@ export default function App({ user, signOut }) {
     triggerLevelUp
   );
 
-  const skillsRef = useRef(skills);
   useEffect(() => { skillsRef.current = skills; }, [skills]);
 
   // Initialize playerPrayer with actual skill level when skills become available
@@ -783,7 +785,10 @@ export default function App({ user, signOut }) {
   const marketUsername = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player';
 
   // Clan system
-  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment, getBrowseClans, requestJoinClan, reviewJoinRequest, clanJoinRequests, loadJoinRequests } = useClan(user?.id, marketUsername);
+  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment, getBrowseClans, requestJoinClan, reviewJoinRequest, clanJoinRequests, loadJoinRequests, checkPendingInvites, acceptInvite, declineInvite } = useClan(user?.id, marketUsername);
+
+  // Chat system
+  const { messages: chatMessages, activeTab: chatTab, setActiveTab: setChatTab, isOpen: chatOpen, toggleChat, sendMessage: sendChatMessage } = useChat(user?.id, marketUsername, clan?.id);
 
   // Refs for clan
   const clanRef = useRef(clan);
@@ -838,7 +843,7 @@ export default function App({ user, signOut }) {
       <LevelUpToast levelUps={levelUps} activeAction={activeAction} ACTIONS={ACTIONS} screen={screen} />
 
       <div className="main-area">
-        <TopBar inventory={inventory} screen={screen} skills={skills} setScreen={setScreen} setActivePopup={setActivePopup} hardResetGame={hardResetGame} signOut={handleSignOut} user={user} />
+        <TopBar inventory={inventory} screen={screen} skills={skills} setScreen={setScreen} setActivePopup={setActivePopup} hardResetGame={hardResetGame} signOut={handleSignOut} user={user} onToggleChat={toggleChat} />
 
         <div className="main-body">
         <Sidebar screen={screen} setScreen={setScreen} skills={skills} activeAction={activeAction} ACTIONS={ACTIONS} combatLevel={combatLevel} />
@@ -866,6 +871,9 @@ export default function App({ user, signOut }) {
               user={user}
               clanJoinRequests={clanJoinRequests}
               loadJoinRequests={loadJoinRequests}
+              checkPendingInvites={checkPendingInvites}
+              acceptInvite={acceptInvite}
+              declineInvite={declineInvite}
             />
           )}
 
@@ -1143,6 +1151,16 @@ export default function App({ user, signOut }) {
       )}
 
       <VictoryModal ACTIONS={ACTIONS} fightCaveVictory={fightCaveVictory} setFightCaveVictory={setFightCaveVictory} />
+      
+      <ChatPanel
+        messages={chatMessages}
+        activeTab={chatTab}
+        setActiveTab={setChatTab}
+        isOpen={chatOpen}
+        sendMessage={sendChatMessage}
+        clanId={clan?.id}
+        username={marketUsername}
+      />
     </div>
   );
 }

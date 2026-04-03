@@ -196,7 +196,7 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
               </div>
             </div>
             {!(inventory.autoToolboxUpgrade) ? (() => {
-              const cost = 100_000;
+              const cost = 1;
               const canAfford = (inventory.coins || 0) >= cost;
               return (
                 <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>
@@ -231,7 +231,7 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
               </div>
             </div>
             {!(inventory.autoEatUpgrade) ? (() => {
-              const cost = 250_000;
+              const cost = 1;
               const canAfford = (inventory.coins || 0) >= cost;
               return (
                 <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>
@@ -266,7 +266,7 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
               </div>
             </div>
             {!(inventory.questUpgrade) ? (() => {
-              const cost = 100_000;
+              const cost = 1;
               const canAfford = (inventory.coins || 0) >= cost;
               return (
                 <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>
@@ -301,7 +301,7 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
               </div>
             </div>
             {!(inventory.marketAnalyticsUpgrade) ? (() => {
-              const cost = 500_000;
+              const cost = 1;
               const canAfford = (inventory.coins || 0) >= cost;
               return (
                 <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>

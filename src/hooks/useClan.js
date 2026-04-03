@@ -602,31 +602,207 @@ export function useClan(userId, username) {
     });
   }, []);
 
-  // Invite a member to clan
-  const inviteMember = useCallback((playerName) => {
+  // Invite a member to clan (stores invite in Supabase)
+  const inviteMember = useCallback(async (playerName) => {
     if (!playerName.trim()) {
       alert('Please enter a player name!');
       return false;
     }
-    setClan(prev => {
-      if (!prev) return prev;
-      // Check if player already in clan
-      if (prev.members.some(m => m.name.toLowerCase() === playerName.toLowerCase())) {
+    if (!clan?.id || !userId) {
+      alert('You must be in a clan to invite players!');
+      return false;
+    }
+
+    try {
+      // Check if player is already in the clan (local check)
+      if (clan.members.some(m => m.name.toLowerCase() === playerName.trim().toLowerCase())) {
         alert('This player is already in the clan!');
-        return prev;
+        return false;
       }
-      return {
-        ...prev,
-        members: [...prev.members, {
-          name: playerName,
-          rank: 'Recruit',
-          activity: 'Idle',
-          activityStart: Date.now(),
-          online: Math.random() > 0.5
-        }]
+
+      // Check if invite already exists
+      const { data: existingInvite } = await supabase
+        .from('clan_join_requests')
+        .select('id')
+        .eq('clan_id', clan.id)
+        .eq('username', playerName.trim())
+        .eq('message', 'CLAN_INVITE')
+        .maybeSingle();
+
+      if (existingInvite) {
+        alert('An invite has already been sent to this player!');
+        return false;
+      }
+
+      // Store invite as a join request with CLAN_INVITE marker
+      const { error } = await supabase
+        .from('clan_join_requests')
+        .insert({
+          clan_id: clan.id,
+          user_id: userId, // Inviter's user_id
+          username: playerName.trim(),
+          total_level: 0,
+          combat_level: 0,
+          message: 'CLAN_INVITE'
+        });
+
+      if (error) {
+        console.error('[Clan] Invite error:', error);
+        alert('Failed to send invite. Please try again.');
+        return false;
+      }
+
+      alert(`Invite sent to ${playerName.trim()}! They will see it in their clan browser.`);
+      return true;
+    } catch (err) {
+      console.error('[Clan] Invite error:', err);
+      alert('Failed to send invite. Please try again.');
+      return false;
+    }
+  }, [clan, userId]);
+
+  // Check for pending clan invites addressed to the current user
+  const checkPendingInvites = useCallback(async () => {
+    if (!username || clan) return []; // Don't check if already in a clan
+
+    try {
+      const { data, error } = await supabase
+        .from('clan_join_requests')
+        .select('id, clan_id, username, requested_at')
+        .eq('username', username)
+        .eq('message', 'CLAN_INVITE')
+        .order('requested_at', { ascending: false });
+
+      if (error || !data) return [];
+
+      // Get clan names for each invite
+      const invitesWithClanName = await Promise.all(
+        data.map(async (invite) => {
+          const { data: clanData } = await supabase
+            .from('clans')
+            .select('name')
+            .eq('id', invite.clan_id)
+            .single();
+          return {
+            ...invite,
+            clanName: clanData?.name || 'Unknown Clan'
+          };
+        })
+      );
+
+      return invitesWithClanName;
+    } catch (err) {
+      console.error('[Clan] Check invites error:', err);
+      return [];
+    }
+  }, [username, clan]);
+
+  // Accept a clan invite
+  const acceptInvite = useCallback(async (inviteId, clanId) => {
+    if (!userId || !username) return false;
+
+    try {
+      // Check if already in a clan
+      const { data: existingMember } = await supabase
+        .from('clan_members')
+        .select('clan_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existingMember) {
+        alert('You are already in a clan! Leave your current clan first.');
+        return false;
+      }
+
+      // Add self as member in Supabase
+      const { error: joinErr } = await supabase
+        .from('clan_members')
+        .insert({
+          clan_id: clanId,
+          user_id: userId,
+          username: username,
+          rank: 'Recruit'
+        });
+
+      if (joinErr) {
+        console.error('[Clan] Accept invite error:', joinErr);
+        alert('Failed to accept invite. Please try again.');
+        return false;
+      }
+
+      // Delete the invite
+      await supabase
+        .from('clan_join_requests')
+        .delete()
+        .eq('id', inviteId);
+
+      // Fetch clan data and members
+      const { data: clanData } = await supabase
+        .from('clans')
+        .select('*')
+        .eq('id', clanId)
+        .single();
+
+      const { data: members } = await supabase
+        .from('clan_members')
+        .select('*')
+        .eq('clan_id', clanId)
+        .order('joined_at', { ascending: true });
+
+      const memberList = (members || []).map(m => ({
+        name: m.user_id === userId ? 'You' : m.username,
+        rank: m.rank,
+        activity: 'Idle',
+        activityStart: Date.now(),
+        online: m.user_id === userId,
+        supabaseUserId: m.user_id
+      }));
+
+      // Put "You" first
+      const youIdx = memberList.findIndex(m => m.name === 'You');
+      if (youIdx > 0) {
+        const [you] = memberList.splice(youIdx, 1);
+        memberList.unshift(you);
+      }
+
+      const localClan = {
+        id: clanData.id,
+        name: clanData.name,
+        level: clanData.level || 1,
+        credits: 0,
+        createdAt: new Date(clanData.created_at).getTime(),
+        members: memberList,
+        vault: [],
+        vaultSlots: 10,
+        quests: [],
+        upgrades: JSON.parse(JSON.stringify(DEFAULT_UPGRADES)),
+        recruitment: { open: clanData.recruitment_open, message: clanData.recruitment_message },
+        joinRequests: []
       };
-    });
-    return true;
+
+      setClan(localClan);
+      setClanScreen('overview');
+      alert(`You have joined ${clanData.name}!`);
+      return true;
+    } catch (err) {
+      console.error('[Clan] Accept invite error:', err);
+      alert('Failed to accept invite. Please try again.');
+      return false;
+    }
+  }, [userId, username]);
+
+  // Decline a clan invite
+  const declineInvite = useCallback(async (inviteId) => {
+    try {
+      await supabase
+        .from('clan_join_requests')
+        .delete()
+        .eq('id', inviteId);
+      return true;
+    } catch (err) {
+      console.error('[Clan] Decline invite error:', err);
+      return false;
+    }
   }, []);
 
   // Update recruitment settings
@@ -675,6 +851,9 @@ export function useClan(userId, username) {
     sentJoinRequest,
     setSentJoinRequest,
     clanJoinRequests,
-    loadJoinRequests
+    loadJoinRequests,
+    checkPendingInvites,
+    acceptInvite,
+    declineInvite
   };
 }

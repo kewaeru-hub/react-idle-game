@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { WEAPONS, ARMOR, AMMO, ITEMS, PETS } from '../data/gameData';
 
-export function useEquipment(initialEquipment, initialAmounts, inventoryRef, setInventory, setCombatStyle) {
+export function useEquipment(initialEquipment, initialAmounts, inventoryRef, setInventory, setCombatStyle, skillsRef) {
   const [equipment, setEquipment] = useState(initialEquipment);
   const [equipmentAmounts, setEquipmentAmounts] = useState(initialAmounts);
 
@@ -12,7 +12,13 @@ export function useEquipment(initialEquipment, initialAmounts, inventoryRef, set
     let slot = itemData.equipSlot;
     if (WEAPONS[itemKey]) slot = 'weapon';
     if (AMMO[itemKey]) slot = 'ammo';
-    if (!slot) return; 
+    if (!slot) return;
+
+    // Level requirement check
+    if (itemData.reqLvl && itemData.reqSkill && skillsRef?.current) {
+      const playerLevel = skillsRef.current[itemData.reqSkill]?.level || 1;
+      if (playerLevel < itemData.reqLvl) return;
+    }
 
     const isAmmo = slot === 'ammo';
     const currentlyEquipped = equipment[slot];

@@ -48,88 +48,88 @@ export const PET_DROP_HOURS = 600; // 1 skilling pet drops per 600 hours of skil
 
 export const WEAPONS = {
   // --- SCIMITARS (Melee) ---
-  bronze_scimitar: { name: 'Bronze Scimitar', att: 6, str: 6, speedTicks: 4, type: 'melee', value: 30 },
-  iron_scimitar: { name: 'Iron Scimitar', att: 10, str: 9, speedTicks: 4, type: 'melee', value: 85 },
-  steel_scimitar: { name: 'Steel Scimitar', att: 21, str: 20, speedTicks: 4, type: 'melee', value: 180 },
-  alloy_scimitar: { name: 'Alloy Scimitar', att: 29, str: 28, speedTicks: 4, type: 'melee', value: 450 },
-  apex_scimitar: { name: 'Apex Scimitar', att: 45, str: 44, speedTicks: 4, type: 'melee', value: 1200 },
-  nova_scimitar: { name: 'Nova Scimitar', att: 67, str: 66, speedTicks: 4, type: 'melee', value: 3500 },
+  bronze_scimitar: { name: 'Bronze Scimitar', att: 6, str: 6, speedTicks: 4, type: 'melee', value: 30, reqLvl: 1, reqSkill: 'attack' },
+  iron_scimitar: { name: 'Iron Scimitar', att: 10, str: 9, speedTicks: 4, type: 'melee', value: 85, reqLvl: 10, reqSkill: 'attack' },
+  steel_scimitar: { name: 'Steel Scimitar', att: 21, str: 20, speedTicks: 4, type: 'melee', value: 180, reqLvl: 30, reqSkill: 'attack' },
+  alloy_scimitar: { name: 'Alloy Scimitar', att: 29, str: 28, speedTicks: 4, type: 'melee', value: 450, reqLvl: 45, reqSkill: 'attack' },
+  apex_scimitar: { name: 'Apex Scimitar', att: 45, str: 44, speedTicks: 4, type: 'melee', value: 1200, reqLvl: 60, reqSkill: 'attack' },
+  nova_scimitar: { name: 'Nova Scimitar', att: 67, str: 66, speedTicks: 4, type: 'melee', value: 3500, reqLvl: 75, reqSkill: 'attack' },
   
   // --- BOWS (Ranged) ---
-  bronze_bow: { name: 'Bronze Bow', att: 8, str: 0, speedTicks: 3, type: 'ranged', value: 35 },
-  iron_bow: { name: 'Iron Bow', att: 14, str: 0, speedTicks: 3, type: 'ranged', value: 95 },
-  steel_bow: { name: 'Steel Bow', att: 20, str: 0, speedTicks: 3, type: 'ranged', value: 210 },
-  alloy_bow: { name: 'Alloy Bow', att: 29, str: 0, speedTicks: 3, type: 'ranged', value: 520 },
-  apex_bow: { name: 'Apex Bow', att: 47, str: 0, speedTicks: 3, type: 'ranged', value: 1400 },
-  nova_bow: { name: 'Nova Bow', att: 69, str: 0, speedTicks: 3, type: 'ranged', value: 4000 },
+  bronze_bow: { name: 'Bronze Bow', att: 8, str: 0, speedTicks: 3, type: 'ranged', value: 35, reqLvl: 1, reqSkill: 'ranged' },
+  iron_bow: { name: 'Iron Bow', att: 14, str: 0, speedTicks: 3, type: 'ranged', value: 95, reqLvl: 10, reqSkill: 'ranged' },
+  steel_bow: { name: 'Steel Bow', att: 20, str: 0, speedTicks: 3, type: 'ranged', value: 210, reqLvl: 30, reqSkill: 'ranged' },
+  alloy_bow: { name: 'Alloy Bow', att: 29, str: 0, speedTicks: 3, type: 'ranged', value: 520, reqLvl: 45, reqSkill: 'ranged' },
+  apex_bow: { name: 'Apex Bow', att: 47, str: 0, speedTicks: 3, type: 'ranged', value: 1400, reqLvl: 60, reqSkill: 'ranged' },
+  nova_bow: { name: 'Nova Bow', att: 69, str: 0, speedTicks: 3, type: 'ranged', value: 4000, reqLvl: 75, reqSkill: 'ranged' },
   
   // --- STAFFS (Magic) ---
-  bronze_staff: { name: 'Bronze Staff', att: 12, str: 18, speedTicks: 5, type: 'magic', value: 40 },
-  iron_staff: { name: 'Iron Staff', att: 26, str: 39, speedTicks: 5, type: 'magic', value: 110 },
-  steel_staff: { name: 'Steel Staff', att: 42, str: 58, speedTicks: 5, type: 'magic', value: 240 },
-  alloy_staff: { name: 'Alloy Staff', att: 63, str: 76, speedTicks: 5, type: 'magic', value: 600 },
-  apex_staff: { name: 'Apex Staff', att: 101, str: 115, speedTicks: 5, type: 'magic', value: 1600 },
-  nova_staff: { name: 'Nova Staff', att: 132, str: 152, speedTicks: 5, type: 'magic', value: 4500 }
+  bronze_staff: { name: 'Bronze Staff', att: 12, str: 18, speedTicks: 5, type: 'magic', value: 40, reqLvl: 1, reqSkill: 'magic' },
+  iron_staff: { name: 'Iron Staff', att: 26, str: 39, speedTicks: 5, type: 'magic', value: 110, reqLvl: 10, reqSkill: 'magic' },
+  steel_staff: { name: 'Steel Staff', att: 42, str: 58, speedTicks: 5, type: 'magic', value: 240, reqLvl: 30, reqSkill: 'magic' },
+  alloy_staff: { name: 'Alloy Staff', att: 63, str: 76, speedTicks: 5, type: 'magic', value: 600, reqLvl: 45, reqSkill: 'magic' },
+  apex_staff: { name: 'Apex Staff', att: 101, str: 115, speedTicks: 5, type: 'magic', value: 1600, reqLvl: 60, reqSkill: 'magic' },
+  nova_staff: { name: 'Nova Staff', att: 132, str: 152, speedTicks: 5, type: 'magic', value: 4500, reqLvl: 75, reqSkill: 'magic' }
 };
 
 export const ARMOR = {
   // 🗡️ MELEE ARMOR
-  bronze_helmet: { name: 'Bronze Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 4, rangedDef: 4, magicDef: -1, value: 20 },
-  bronze_body: { name: 'Bronze Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 11, rangedDef: 14, magicDef: -4, value: 60 },
-  bronze_legs: { name: 'Bronze Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 7, rangedDef: 9, magicDef: -2, value: 40 },
-  bronze_shield: { name: 'Bronze Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 5, rangedDef: 6, magicDef: -2, value: 30 },
+  bronze_helmet: { name: 'Bronze Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 4, rangedDef: 4, magicDef: -1, value: 20, reqLvl: 1, reqSkill: 'defence' },
+  bronze_body: { name: 'Bronze Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 11, rangedDef: 14, magicDef: -4, value: 60, reqLvl: 1, reqSkill: 'defence' },
+  bronze_legs: { name: 'Bronze Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 7, rangedDef: 9, magicDef: -2, value: 40, reqLvl: 1, reqSkill: 'defence' },
+  bronze_shield: { name: 'Bronze Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 5, rangedDef: 6, magicDef: -2, value: 30, reqLvl: 1, reqSkill: 'defence' },
   
-  iron_helmet: { name: 'Iron Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 6, rangedDef: 6, magicDef: -1, value: 55 },
-  iron_body: { name: 'Iron Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 18, rangedDef: 20, magicDef: -4, value: 160 },
-  iron_legs: { name: 'Iron Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 11, rangedDef: 13, magicDef: -2, value: 110 },
-  iron_shield: { name: 'Iron Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 8, rangedDef: 9, magicDef: -2, value: 135 },
+  iron_helmet: { name: 'Iron Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 6, rangedDef: 6, magicDef: -1, value: 55, reqLvl: 10, reqSkill: 'defence' },
+  iron_body: { name: 'Iron Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 18, rangedDef: 20, magicDef: -4, value: 160, reqLvl: 10, reqSkill: 'defence' },
+  iron_legs: { name: 'Iron Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 11, rangedDef: 13, magicDef: -2, value: 110, reqLvl: 10, reqSkill: 'defence' },
+  iron_shield: { name: 'Iron Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 8, rangedDef: 9, magicDef: -2, value: 135, reqLvl: 10, reqSkill: 'defence' },
 
-  steel_helmet: { name: 'Steel Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 12, rangedDef: 12, magicDef: -2, value: 180 },
-  steel_body: { name: 'Steel Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 32, rangedDef: 31, magicDef: -5, value: 400 },
-  steel_legs: { name: 'Steel Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 20, rangedDef: 20, magicDef: -3, value: 280 },
-  steel_shield: { name: 'Steel Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 15, rangedDef: 15, magicDef: -3, value: 220 },
+  steel_helmet: { name: 'Steel Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -3, rangedAcc: -1, defence: 12, rangedDef: 12, magicDef: -2, value: 180, reqLvl: 30, reqSkill: 'defence' },
+  steel_body: { name: 'Steel Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 32, rangedDef: 31, magicDef: -5, value: 400, reqLvl: 30, reqSkill: 'defence' },
+  steel_legs: { name: 'Steel Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -11, rangedAcc: -5, defence: 20, rangedDef: 20, magicDef: -3, value: 280, reqLvl: 30, reqSkill: 'defence' },
+  steel_shield: { name: 'Steel Shield', equipSlot: 'shield', accuracy: -1, magicAcc: -8, rangedAcc: -2, defence: 15, rangedDef: 15, magicDef: -3, value: 220, reqLvl: 30, reqSkill: 'defence' },
 
-  alloy_helmet: { name: 'Alloy Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -4, rangedAcc: -2, defence: 17, rangedDef: 17, magicDef: -5, value: 18000 },
-  alloy_body: { name: 'Alloy Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -18, rangedAcc: -8, defence: 46, rangedDef: 44, magicDef: -10, value: 54000 },
-  alloy_legs: { name: 'Alloy Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -13, rangedAcc: -6, defence: 29, rangedDef: 28, magicDef: -5, value: 36000 },
-  alloy_shield: { name: 'Alloy Shield', equipSlot: 'shield', accuracy: -2, magicAcc: -10, rangedAcc: -3, defence: 22, rangedDef: 21, magicDef: -8, value: 42000 },
+  alloy_helmet: { name: 'Alloy Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -4, rangedAcc: -2, defence: 17, rangedDef: 17, magicDef: -5, value: 18000, reqLvl: 45, reqSkill: 'defence' },
+  alloy_body: { name: 'Alloy Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -18, rangedAcc: -8, defence: 46, rangedDef: 44, magicDef: -10, value: 54000, reqLvl: 45, reqSkill: 'defence' },
+  alloy_legs: { name: 'Alloy Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -13, rangedAcc: -6, defence: 29, rangedDef: 28, magicDef: -5, value: 36000, reqLvl: 45, reqSkill: 'defence' },
+  alloy_shield: { name: 'Alloy Shield', equipSlot: 'shield', accuracy: -2, magicAcc: -10, rangedAcc: -3, defence: 22, rangedDef: 21, magicDef: -8, value: 42000, reqLvl: 45, reqSkill: 'defence' },
   
-  apex_helmet: { name: 'Apex Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -5, rangedAcc: -2, defence: 24, rangedDef: 24, magicDef: -6, value: 45000 },
-  apex_body: { name: 'Apex Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -20, rangedAcc: -10, defence: 65, rangedDef: 63, magicDef: -12, value: 135000 },
-  apex_legs: { name: 'Apex Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 42, rangedDef: 40, magicDef: -7, value: 90000 },
-  apex_shield: { name: 'Apex Shield', equipSlot: 'shield', accuracy: -3, magicAcc: -12, rangedAcc: -4, defence: 31, rangedDef: 30, magicDef: -10, value: 105000 },
+  apex_helmet: { name: 'Apex Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -5, rangedAcc: -2, defence: 24, rangedDef: 24, magicDef: -6, value: 45000, reqLvl: 60, reqSkill: 'defence' },
+  apex_body: { name: 'Apex Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -20, rangedAcc: -10, defence: 65, rangedDef: 63, magicDef: -12, value: 135000, reqLvl: 60, reqSkill: 'defence' },
+  apex_legs: { name: 'Apex Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -15, rangedAcc: -7, defence: 42, rangedDef: 40, magicDef: -7, value: 90000, reqLvl: 60, reqSkill: 'defence' },
+  apex_shield: { name: 'Apex Shield', equipSlot: 'shield', accuracy: -3, magicAcc: -12, rangedAcc: -4, defence: 31, rangedDef: 30, magicDef: -10, value: 105000, reqLvl: 60, reqSkill: 'defence' },
   
-  nova_helmet: { name: 'Nova Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -6, rangedAcc: -3, defence: 33, rangedDef: 33, magicDef: -8, value: 120000 },
-  nova_body: { name: 'Nova Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -22, rangedAcc: -12, defence: 88, rangedDef: 85, magicDef: -15, value: 360000 },
-  nova_legs: { name: 'Nova Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -17, rangedAcc: -8, defence: 57, rangedDef: 55, magicDef: -9, value: 240000 },
-  nova_shield: { name: 'Nova Shield', equipSlot: 'shield', accuracy: -4, magicAcc: -15, rangedAcc: -5, defence: 43, rangedDef: 42, magicDef: -12, value: 280000 },
+  nova_helmet: { name: 'Nova Helmet', equipSlot: 'head', accuracy: 0, magicAcc: -6, rangedAcc: -3, defence: 33, rangedDef: 33, magicDef: -8, value: 120000, reqLvl: 75, reqSkill: 'defence' },
+  nova_body: { name: 'Nova Platebody', equipSlot: 'body', accuracy: 0, magicAcc: -22, rangedAcc: -12, defence: 88, rangedDef: 85, magicDef: -15, value: 360000, reqLvl: 75, reqSkill: 'defence' },
+  nova_legs: { name: 'Nova Platelegs', equipSlot: 'legs', accuracy: 0, magicAcc: -17, rangedAcc: -8, defence: 57, rangedDef: 55, magicDef: -9, value: 240000, reqLvl: 75, reqSkill: 'defence' },
+  nova_shield: { name: 'Nova Shield', equipSlot: 'shield', accuracy: -4, magicAcc: -15, rangedAcc: -5, defence: 43, rangedDef: 42, magicDef: -12, value: 280000, reqLvl: 75, reqSkill: 'defence' },
 
   // 🏹 RANGED ARMOR
-  leather_cowl: { name: 'Leather Cowl', equipSlot: 'head', accuracy: 0, magicAcc: -1, rangedAcc: 2, defence: 2, rangedDef: 4, magicDef: 4, value: 10 },
-  leather_body: { name: 'Leather Body', equipSlot: 'body', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 9, rangedDef: 13, magicDef: 15, value: 25 },
-  leather_chaps: { name: 'Leather Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -3, rangedAcc: 4, defence: 6, rangedDef: 9, magicDef: 10, value: 15 },
+  leather_cowl: { name: 'Leather Cowl', equipSlot: 'head', accuracy: 0, magicAcc: -1, rangedAcc: 2, defence: 2, rangedDef: 4, magicDef: 4, value: 10, reqLvl: 1, reqSkill: 'ranged' },
+  leather_body: { name: 'Leather Body', equipSlot: 'body', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 9, rangedDef: 13, magicDef: 15, value: 25, reqLvl: 1, reqSkill: 'ranged' },
+  leather_chaps: { name: 'Leather Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -3, rangedAcc: 4, defence: 6, rangedDef: 9, magicDef: 10, value: 15, reqLvl: 1, reqSkill: 'ranged' },
 
-  green_leather_body: { name: 'Green Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450 },
-  green_leather_chaps: { name: 'Green Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280 },
+  green_leather_body: { name: 'Green Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450, reqLvl: 40, reqSkill: 'ranged' },
+  green_leather_chaps: { name: 'Green Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280, reqLvl: 40, reqSkill: 'ranged' },
 
-  red_leather_body: { name: 'Red Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450 },
-  red_leather_chaps: { name: 'Red Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280 },
+  red_leather_body: { name: 'Red Body', equipSlot: 'body', accuracy: 0, magicAcc: -10, rangedAcc: 15, defence: 25, rangedDef: 30, magicDef: 40, value: 450, reqLvl: 60, reqSkill: 'ranged' },
+  red_leather_chaps: { name: 'Red Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -5, rangedAcc: 8, defence: 16, rangedDef: 20, magicDef: 24, value: 280, reqLvl: 60, reqSkill: 'ranged' },
 
-  black_leather_body: { name: 'Black Body', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: 30, defence: 50, rangedDef: 60, magicDef: 70, value: 1800 },
-  black_leather_chaps: { name: 'Black Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -8, rangedAcc: 17, defence: 32, rangedDef: 40, magicDef: 45, value: 1100 },
+  black_leather_body: { name: 'Black Body', equipSlot: 'body', accuracy: 0, magicAcc: -15, rangedAcc: 30, defence: 50, rangedDef: 60, magicDef: 70, value: 1800, reqLvl: 75, reqSkill: 'ranged' },
+  black_leather_chaps: { name: 'Black Chaps', equipSlot: 'legs', accuracy: 0, magicAcc: -8, rangedAcc: 17, defence: 32, rangedDef: 40, magicDef: 45, value: 1100, reqLvl: 75, reqSkill: 'ranged' },
 
   // 🧙 MAGIC ARMOR
-  apprentice_hat: { name: 'Apprentice Hat', equipSlot: 'head', accuracy: -2, magicAcc: 3, rangedAcc: -2, defence: 2, rangedDef: 0, magicDef: 3, value: 15 },
-  apprentice_top: { name: 'Apprentice Top', equipSlot: 'body', accuracy: -4, magicAcc: 8, rangedAcc: -4, defence: 5, rangedDef: 0, magicDef: 8, value: 30 },
-  apprentice_bottom: { name: 'Apprentice Bottom', equipSlot: 'legs', accuracy: -3, magicAcc: 5, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 5, value: 20 },
+  apprentice_hat: { name: 'Apprentice Hat', equipSlot: 'head', accuracy: -2, magicAcc: 3, rangedAcc: -2, defence: 2, rangedDef: 0, magicDef: 3, value: 15, reqLvl: 1, reqSkill: 'magic' },
+  apprentice_top: { name: 'Apprentice Top', equipSlot: 'body', accuracy: -4, magicAcc: 8, rangedAcc: -4, defence: 5, rangedDef: 0, magicDef: 8, value: 30, reqLvl: 1, reqSkill: 'magic' },
+  apprentice_bottom: { name: 'Apprentice Bottom', equipSlot: 'legs', accuracy: -3, magicAcc: 5, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 5, value: 20, reqLvl: 1, reqSkill: 'magic' },
 
-  wizard_hat: { name: 'Wizard Hat', equipSlot: 'head', accuracy: -3, magicAcc: 6, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 6, value: 60 },
-  wizard_top: { name: 'Wizard Top', equipSlot: 'body', accuracy: -8, magicAcc: 15, rangedAcc: -8, defence: 10, rangedDef: 0, magicDef: 15, value: 120 },
-  wizard_bottom: { name: 'Wizard Bottom', equipSlot: 'legs', accuracy: -6, magicAcc: 10, rangedAcc: -6, defence: 8, rangedDef: 0, magicDef: 10, value: 80 },
+  wizard_hat: { name: 'Wizard Hat', equipSlot: 'head', accuracy: -3, magicAcc: 6, rangedAcc: -3, defence: 4, rangedDef: 0, magicDef: 6, value: 60, reqLvl: 40, reqSkill: 'magic' },
+  wizard_top: { name: 'Wizard Top', equipSlot: 'body', accuracy: -8, magicAcc: 15, rangedAcc: -8, defence: 10, rangedDef: 0, magicDef: 15, value: 120, reqLvl: 40, reqSkill: 'magic' },
+  wizard_bottom: { name: 'Wizard Bottom', equipSlot: 'legs', accuracy: -6, magicAcc: 10, rangedAcc: -6, defence: 8, rangedDef: 0, magicDef: 10, value: 80, reqLvl: 40, reqSkill: 'magic' },
 
-  mystic_hat: { name: 'Mystic Hat', equipSlot: 'head', accuracy: -5, magicAcc: 12, rangedAcc: -5, defence: 8, rangedDef: 0, magicDef: 12, value: 5000 },
-  mystic_top: { name: 'Mystic Top', equipSlot: 'body', accuracy: -15, magicAcc: 30, rangedAcc: -15, defence: 20, rangedDef: 0, magicDef: 30, value: 15000 },
-  mystic_bottom: { name: 'Mystic Bottom', equipSlot: 'legs', accuracy: -10, magicAcc: 20, rangedAcc: -10, defence: 15, rangedDef: 0, magicDef: 20, value: 10000 }
+  mystic_hat: { name: 'Mystic Hat', equipSlot: 'head', accuracy: -5, magicAcc: 12, rangedAcc: -5, defence: 8, rangedDef: 0, magicDef: 12, value: 5000, reqLvl: 70, reqSkill: 'magic' },
+  mystic_top: { name: 'Mystic Top', equipSlot: 'body', accuracy: -15, magicAcc: 30, rangedAcc: -15, defence: 20, rangedDef: 0, magicDef: 30, value: 15000, reqLvl: 70, reqSkill: 'magic' },
+  mystic_bottom: { name: 'Mystic Bottom', equipSlot: 'legs', accuracy: -10, magicAcc: 20, rangedAcc: -10, defence: 15, rangedDef: 0, magicDef: 20, value: 10000, reqLvl: 70, reqSkill: 'magic' }
 };
 
 export const AMMO = {
@@ -614,9 +614,9 @@ export const ACTIONS = {
   craft_bronze_arrow: { skill: 'crafting', name: 'Bronze Arrows (x40)', reqLvl: 1, category: 'ammo', xp: 12, baseTime: 1260, cost: { spruce_log: 1, bronze_bar: 1 }, reward: { bronze_arrow: 40 } },
   craft_iron_arrow: { skill: 'crafting', name: 'Iron Arrows (x40)', reqLvl: 15, category: 'ammo', xp: 25, baseTime: 1440, cost: { oak_log: 1, iron_bar: 1 }, reward: { iron_arrow: 40 } },
   craft_steel_arrow: { skill: 'crafting', name: 'Steel Arrows (x40)', reqLvl: 30, category: 'ammo', xp: 42, baseTime: 1680, cost: { willow_log: 1, steel_bar: 1 }, reward: { steel_arrow: 40 } },
-  craft_alloy_arrow: { skill: 'crafting', name: 'Alloy Arrows (x40)', reqLvl: 50, category: 'ammo', xp: 68, baseTime: 1920, cost: { maple_log: 1, alloy_bar: 1 }, reward: { alloy_arrow: 40 } },
-  craft_apex_arrow: { skill: 'crafting', name: 'Apex Arrows (x40)', reqLvl: 70, category: 'ammo', xp: 95, baseTime: 2220, cost: { yew_log: 1, apex_bar: 1 }, reward: { apex_arrow: 40 } },
-  craft_nova_arrow: { skill: 'crafting', name: 'Nova Arrows (x40)', reqLvl: 85, category: 'ammo', xp: 130, baseTime: 2520, cost: { magic_log: 1, nova_bar: 1 }, reward: { nova_arrow: 40 } },
+  craft_alloy_arrow: { skill: 'crafting', name: 'Alloy Arrows (x40)', reqLvl: 45, category: 'ammo', xp: 68, baseTime: 1920, cost: { maple_log: 1, alloy_bar: 1 }, reward: { alloy_arrow: 40 } },
+  craft_apex_arrow: { skill: 'crafting', name: 'Apex Arrows (x40)', reqLvl: 60, category: 'ammo', xp: 95, baseTime: 2220, cost: { yew_log: 1, apex_bar: 1 }, reward: { apex_arrow: 40 } },
+  craft_nova_arrow: { skill: 'crafting', name: 'Nova Arrows (x40)', reqLvl: 75, category: 'ammo', xp: 130, baseTime: 2520, cost: { magic_log: 1, nova_bar: 1 }, reward: { nova_arrow: 40 } },
 
 // ==========================================
   // --- SMITHING (Smelting - Ore to Bar) ---
@@ -625,56 +625,66 @@ export const ACTIONS = {
   smelt_iron_bar: { skill: 'smithing', name: 'Iron Bar', baseTime: 1800, xp: 25, reqLvl: 15, cost: { iron_ore: 1 }, reward: { iron_bar: 1 } },
   smelt_steel_bar: { skill: 'smithing', name: 'Steel Bar', baseTime: 1920, xp: 38, reqLvl: 30, cost: { iron_ore: 1, coal_ore: 1 }, reward: { steel_bar: 1 } },
   smelt_alloy_bar: { skill: 'smithing', name: 'Alloy Bar', baseTime: 2280, xp: 55, reqLvl: 50, cost: { alloy_ore: 1, coal_ore: 2 }, reward: { alloy_bar: 1 } },
-  smelt_apex_bar: { skill: 'smithing', name: 'Apex Bar', baseTime: 2520, xp: 88, reqLvl: 70, cost: { apex_ore: 1, coal_ore: 5 }, reward: { apex_bar: 1 } },
-  smelt_nova_bar: { skill: 'smithing', name: 'Nova Bar', baseTime: 2880, xp: 130, reqLvl: 85, cost: { nova_ore: 2, coal_ore: 10 }, reward: { nova_bar: 1 } },
+  smelt_apex_bar: { skill: 'smithing', name: 'Apex Bar', baseTime: 2520, xp: 88, reqLvl: 65, cost: { apex_ore: 1, coal_ore: 5 }, reward: { apex_bar: 1 } },
+  smelt_nova_bar: { skill: 'smithing', name: 'Nova Bar', baseTime: 2880, xp: 130, reqLvl: 80, cost: { nova_ore: 2, coal_ore: 10 }, reward: { nova_bar: 1 } },
 
   // ==========================================
   // ==========================================
   // BRONZE (Level 1+)
   smith_bronze_helmet: { skill: 'smithing', name: 'Bronze Helmet', reqLvl: 1, xp: 25, baseTime: 2100, cost: { bronze_bar: 2 }, reward: { bronze_helmet: 1 } },
-  smith_bronze_legs: { skill: 'smithing', name: 'Bronze Platelegs', reqLvl: 14, xp: 37, baseTime: 2520, cost: { bronze_bar: 3 }, reward: { bronze_legs: 1 } },
-  smith_bronze_body: { skill: 'smithing', name: 'Bronze Platebody', reqLvl: 18, xp: 62, baseTime: 3300, cost: { bronze_bar: 5 }, reward: { bronze_body: 1 } },
+  smith_bronze_shield: { skill: 'smithing', name: 'Bronze Shield', reqLvl: 5, xp: 30, baseTime: 2280, cost: { bronze_bar: 2 }, reward: { bronze_shield: 1 } },
+  smith_bronze_legs: { skill: 'smithing', name: 'Bronze Platelegs', reqLvl: 7, xp: 37, baseTime: 2520, cost: { bronze_bar: 3 }, reward: { bronze_legs: 1 } },
+  smith_bronze_body: { skill: 'smithing', name: 'Bronze Platebody', reqLvl: 10, xp: 62, baseTime: 3300, cost: { bronze_bar: 5 }, reward: { bronze_body: 1 } },
 
   // IRON (Level 15+)
   smith_iron_helmet: { skill: 'smithing', name: 'Iron Helmet', reqLvl: 15, xp: 50, baseTime: 2280, cost: { iron_bar: 2 }, reward: { iron_helmet: 1 } },
-  smith_iron_legs: { skill: 'smithing', name: 'Iron Platelegs', reqLvl: 31, xp: 75, baseTime: 2700, cost: { iron_bar: 3 }, reward: { iron_legs: 1 } },
-  smith_iron_body: { skill: 'smithing', name: 'Iron Platebody', reqLvl: 33, xp: 125, baseTime: 3720, cost: { iron_bar: 5 }, reward: { iron_body: 1 } },
+  smith_iron_shield: { skill: 'smithing', name: 'Iron Shield', reqLvl: 18, xp: 60, baseTime: 2460, cost: { iron_bar: 2 }, reward: { iron_shield: 1 } },
+  smith_iron_legs: { skill: 'smithing', name: 'Iron Platelegs', reqLvl: 22, xp: 75, baseTime: 2700, cost: { iron_bar: 3 }, reward: { iron_legs: 1 } },
+  smith_iron_body: { skill: 'smithing', name: 'Iron Platebody', reqLvl: 25, xp: 125, baseTime: 3720, cost: { iron_bar: 5 }, reward: { iron_body: 1 } },
 
   // STEEL (Level 30+)
   smith_steel_helmet: { skill: 'smithing', name: 'Steel Helmet', reqLvl: 30, xp: 75, baseTime: 2400, cost: { steel_bar: 2 }, reward: { steel_helmet: 1 } },
-  smith_steel_legs: { skill: 'smithing', name: 'Steel Platelegs', reqLvl: 37, xp: 112, baseTime: 2880, cost: { steel_bar: 3 }, reward: { steel_legs: 1 } },
-  smith_steel_body: { skill: 'smithing', name: 'Steel Platebody', reqLvl: 41, xp: 187, baseTime: 3900, cost: { steel_bar: 5 }, reward: { steel_body: 1 } },
+  smith_steel_shield: { skill: 'smithing', name: 'Steel Shield', reqLvl: 34, xp: 90, baseTime: 2580, cost: { steel_bar: 2 }, reward: { steel_shield: 1 } },
+  smith_steel_legs: { skill: 'smithing', name: 'Steel Platelegs', reqLvl: 38, xp: 112, baseTime: 2880, cost: { steel_bar: 3 }, reward: { steel_legs: 1 } },
+  smith_steel_body: { skill: 'smithing', name: 'Steel Platebody', reqLvl: 42, xp: 187, baseTime: 3900, cost: { steel_bar: 5 }, reward: { steel_body: 1 } },
 
   // ALLOY (Level 50+)
   smith_alloy_helmet: { skill: 'smithing', name: 'Alloy Helmet', reqLvl: 50, xp: 110, baseTime: 2700, cost: { alloy_bar: 2 }, reward: { alloy_helmet: 1 } },
-  smith_alloy_legs: { skill: 'smithing', name: 'Alloy Platelegs', reqLvl: 57, xp: 165, baseTime: 3240, cost: { alloy_bar: 3 }, reward: { alloy_legs: 1 } },
-  smith_alloy_body: { skill: 'smithing', name: 'Alloy Platebody', reqLvl: 61, xp: 275, baseTime: 4200, cost: { alloy_bar: 5 }, reward: { alloy_body: 1 } },
+  smith_alloy_shield: { skill: 'smithing', name: 'Alloy Shield', reqLvl: 53, xp: 130, baseTime: 2880, cost: { alloy_bar: 2 }, reward: { alloy_shield: 1 } },
+  smith_alloy_legs: { skill: 'smithing', name: 'Alloy Platelegs', reqLvl: 56, xp: 165, baseTime: 3240, cost: { alloy_bar: 3 }, reward: { alloy_legs: 1 } },
+  smith_alloy_body: { skill: 'smithing', name: 'Alloy Platebody', reqLvl: 60, xp: 275, baseTime: 4200, cost: { alloy_bar: 5 }, reward: { alloy_body: 1 } },
 
   // APEX (Level 70+)
   smith_apex_helmet: { skill: 'smithing', name: 'Apex Helmet', reqLvl: 70, xp: 150, baseTime: 2880, cost: { apex_bar: 2 }, reward: { apex_helmet: 1 } },
-  smith_apex_legs: { skill: 'smithing', name: 'Apex Platelegs', reqLvl: 77, xp: 225, baseTime: 3480, cost: { apex_bar: 3 }, reward: { apex_legs: 1 } },
-  smith_apex_body: { skill: 'smithing', name: 'Apex Platebody', reqLvl: 82, xp: 375, baseTime: 4500, cost: { apex_bar: 5 }, reward: { apex_body: 1 } },
+  smith_apex_shield: { skill: 'smithing', name: 'Apex Shield', reqLvl: 72, xp: 180, baseTime: 3060, cost: { apex_bar: 2 }, reward: { apex_shield: 1 } },
+  smith_apex_legs: { skill: 'smithing', name: 'Apex Platelegs', reqLvl: 75, xp: 225, baseTime: 3480, cost: { apex_bar: 3 }, reward: { apex_legs: 1 } },
+  smith_apex_body: { skill: 'smithing', name: 'Apex Platebody', reqLvl: 78, xp: 375, baseTime: 4500, cost: { apex_bar: 5 }, reward: { apex_body: 1 } },
 
   // NOVA (Level 85+)
-  smith_nova_helmet: { skill: 'smithing', name: 'Nova Helmet', reqLvl: 85, xp: 200, baseTime: 3120, cost: { nova_bar: 2 }, reward: { nova_helmet: 1 } },
-  smith_nova_legs: { skill: 'smithing', name: 'Nova Platelegs', reqLvl: 92, xp: 300, baseTime: 3780, cost: { nova_bar: 3 }, reward: { nova_legs: 1 } },
-  smith_nova_body: { skill: 'smithing', name: 'Nova Platebody', reqLvl: 96, xp: 500, baseTime: 4800, cost: { nova_bar: 5 }, reward: { nova_body: 1 } },
+  smith_nova_helmet: { skill: 'smithing', name: 'Nova Helmet', reqLvl: 80, xp: 200, baseTime: 3120, cost: { nova_bar: 2 }, reward: { nova_helmet: 1 } },
+  smith_nova_shield: { skill: 'smithing', name: 'Nova Shield', reqLvl: 82, xp: 240, baseTime: 3300, cost: { nova_bar: 2 }, reward: { nova_shield: 1 } },
+  smith_nova_legs: { skill: 'smithing', name: 'Nova Platelegs', reqLvl: 84, xp: 300, baseTime: 3780, cost: { nova_bar: 3 }, reward: { nova_legs: 1 } },
+  smith_nova_body: { skill: 'smithing', name: 'Nova Platebody', reqLvl: 86, xp: 500, baseTime: 4800, cost: { nova_bar: 5 }, reward: { nova_body: 1 } },
 
   // ==========================================
   // --- CRAFTING (Ranged Armor - Leather) ---
   // ==========================================
   // NORMAL LEATHER
   craft_leather_cowl: { skill: 'crafting', name: 'Leather Cowl', reqLvl: 1, xp: 16, baseTime: 1680, cost: { leather: 1 }, reward: { leather_cowl: 1 } },
-  craft_leather_chaps: { skill: 'crafting', name: 'Leather Chaps', reqLvl: 18, xp: 32, baseTime: 2100, cost: { leather: 2 }, reward: { leather_chaps: 1 } },
-  craft_leather_body: { skill: 'crafting', name: 'Leather Body', reqLvl: 14, xp: 48, baseTime: 2520, cost: { leather: 3 }, reward: { leather_body: 1 } },
+  craft_leather_chaps: { skill: 'crafting', name: 'Leather Chaps', reqLvl: 14, xp: 32, baseTime: 2100, cost: { leather: 2 }, reward: { leather_chaps: 1 } },
+  craft_leather_body: { skill: 'crafting', name: 'Leather Body', reqLvl: 18, xp: 48, baseTime: 2520, cost: { leather: 3 }, reward: { leather_body: 1 } },
 
-  // GREEN LEATHER (Level 57+)
-  craft_green_chaps: { skill: 'crafting', name: 'Green Chaps', reqLvl: 60, xp: 124, baseTime: 2460, cost: { green_leather: 2 }, reward: { green_leather_chaps: 1 } },
-  craft_green_body: { skill: 'crafting', name: 'Green Body', reqLvl: 63, xp: 186, baseTime: 3000, cost: { green_leather: 3 }, reward: { green_leather_body: 1 } },
+  // GREEN LEATHER (Level 40+)
+  craft_green_chaps: { skill: 'crafting', name: 'Green Chaps', reqLvl: 40, xp: 124, baseTime: 2460, cost: { green_dragon_leather: 2 }, reward: { green_leather_chaps: 1 } },
+  craft_green_body: { skill: 'crafting', name: 'Green Body', reqLvl: 45, xp: 186, baseTime: 3000, cost: { green_dragon_leather: 3 }, reward: { green_leather_body: 1 } },
 
-  // BLACK LEATHER (Level 79+)
-  craft_black_chaps: { skill: 'crafting', name: 'Black Chaps', reqLvl: 82, xp: 172, baseTime: 2880, cost: { black_leather: 2 }, reward: { black_leather_chaps: 1 } },
-  craft_black_body: { skill: 'crafting', name: 'Black Body', reqLvl: 84, xp: 258, baseTime: 3480, cost: { black_leather: 3 }, reward: { black_leather_body: 1 } },
+  // RED LEATHER (Level 57+)
+  craft_red_chaps: { skill: 'crafting', name: 'Red Chaps', reqLvl: 57, xp: 148, baseTime: 2640, cost: { red_dragon_leather: 2 }, reward: { red_leather_chaps: 1 } },
+  craft_red_body: { skill: 'crafting', name: 'Red Body', reqLvl: 62, xp: 222, baseTime: 3240, cost: { red_dragon_leather: 3 }, reward: { red_leather_body: 1 } },
+
+  // BLACK LEATHER (Level 75+)
+  craft_black_chaps: { skill: 'crafting', name: 'Black Chaps', reqLvl: 75, xp: 172, baseTime: 2880, cost: { black_dragon_leather: 2 }, reward: { black_leather_chaps: 1 } },
+  craft_black_body: { skill: 'crafting', name: 'Black Body', reqLvl: 78, xp: 258, baseTime: 3480, cost: { black_dragon_leather: 3 }, reward: { black_leather_body: 1 } },
 
   // ==========================================
   // --- CRAFTING (Magic Armor - Robes) ---

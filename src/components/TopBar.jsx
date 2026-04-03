@@ -1,7 +1,7 @@
 import React from 'react';
 import { getRequiredXp } from '../utils/gameHelpers';
 
-export default function TopBar({ inventory, screen, skills, setScreen, setActivePopup, hardResetGame, signOut, user }) {
+export default function TopBar({ inventory, screen, skills, setScreen, setActivePopup, hardResetGame, signOut, user, onToggleChat }) {
   return (
     <header className="topbar">
       {/* LEFT SIDE - ONLY PROFILE & NAV BUTTONS */}
@@ -58,6 +58,7 @@ export default function TopBar({ inventory, screen, skills, setScreen, setActive
 
       {/* RIGHT SIDE */}
       <div className="topbar-right">
+        <button className="top-btn" onClick={onToggleChat}>💬 Chat</button>
         <button className="top-btn" onClick={() => setActivePopup('Quests')}>Quests</button>
         <button className="top-btn" onClick={() => setActivePopup('Analytics')}>Analytics</button>
         <button className="top-btn btn-wipe" onClick={hardResetGame}>Wipe Save</button>
