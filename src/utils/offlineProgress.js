@@ -38,8 +38,8 @@ export function calculateOfflineProgress(
   const maxOfflineMs = (12 + (inventory.offlineHoursUpgrade || 0)) * 3600000; // 12 + upgrade uren in ms
   const cappedMs = Math.min(offlineMs, maxOfflineMs);
 
-  // 2. Als minder dan 1 minuut → geen progressie tonen
-  if (cappedMs < 60000) return null;
+  // 2. Als minder dan 30 seconden → geen progressie tonen
+  if (cappedMs < 30000) return null;
 
   // 3. Als geen actie of combat → geen progressie
   if (!activeAction || !ACTIONS[activeAction]) return null;

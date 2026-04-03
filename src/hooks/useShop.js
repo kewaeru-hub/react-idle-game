@@ -90,5 +90,16 @@ export function useShop(setInventory, inventory) {
     }
   };
 
-  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade };
+  // Functie 8: Market Analytics Upgrade kopen
+  const buyMarketAnalytics = (cost) => {
+    if ((inventory.coins || 0) >= cost) {
+      setInventory(prev => ({
+        ...prev,
+        coins: prev.coins - cost,
+        marketAnalyticsUpgrade: 1
+      }));
+    }
+  };
+
+  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade, buyMarketAnalytics };
 }

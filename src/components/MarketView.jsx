@@ -33,6 +33,9 @@ export default function MarketView({
   const [buyModalSearch, setBuyModalSearch] = useState('');
   const [sellModalSearch, setSellModalSearch] = useState('');
   const [chartItemSearch, setChartItemSearch] = useState('');
+  const [analyticsSearch, setAnalyticsSearch] = useState('');
+  const [analyticsSortKey, setAnalyticsSortKey] = useState('vol24h');
+  const [analyticsSortDir, setAnalyticsSortDir] = useState('desc');
 
   // Popular items list
   const popularItems = ['iron_ore', 'coal_ore', 'cooked_shrimp', 'oak_log', 'bronze_bar', 'steel_bar', 'raw_lobster', 'yew_log'];
@@ -106,6 +109,104 @@ export default function MarketView({
       .slice(0, 15);
   }, [chartItemSearch]);
 
+  // Price hints for modals — top 3 buy/sell offers for the selected item
+  const itemBuyOffers = useMemo(() => {
+    if (!modalItemId) return [];
+    return allOffers
+      .filter(o => o.itemId === modalItemId && o.type === 'buy' && o.status === 'active')
+      .sort((a, b) => b.pricePerItem - a.pricePerItem)
+      .slice(0, 3);
+  }, [modalItemId, allOffers]);
+
+  const itemSellOffers = useMemo(() => {
+    if (!modalItemId) return [];
+    return allOffers
+      .filter(o => o.itemId === modalItemId && o.type === 'sell' && o.status === 'active')
+      .sort((a, b) => a.pricePerItem - b.pricePerItem)
+      .slice(0, 3);
+  }, [modalItemId, allOffers]);
+
+  // Analytics data — aggregate per item
+  const analyticsData = useMemo(() => {
+    const itemIds = new Set();
+    allOffers.forEach(o => itemIds.add(o.itemId));
+    if (priceSummary) Object.keys(priceSummary).forEach(id => itemIds.add(id));
+    return Array.from(itemIds).map(itemId => {
+      const item = ITEMS[itemId];
+      if (!item) return null;
+      const activeBuys = allOffers.filter(o => o.itemId === itemId && o.type === 'buy' && o.status === 'active');
+      const activeSells = allOffers.filter(o => o.itemId === itemId && o.type === 'sell' && o.status === 'active');
+      const highestBuy = activeBuys.length > 0 ? Math.max(...activeBuys.map(o => o.pricePerItem)) : null;
+      const lowestSell = activeSells.length > 0 ? Math.min(...activeSells.map(o => o.pricePerItem)) : null;
+      const spread = (highestBuy !== null && lowestSell !== null) ? lowestSell - highestBuy : null;
+      const summary = priceSummary?.[itemId];
+      const avg24h = summary?.avg_price || null;
+      const vol24h = summary?.total_volume || 0;
+      const min24h = summary?.min_price || null;
+      const max24h = summary?.max_price || null;
+      const tradeCount = summary?.trade_count || 0;
+      const baseValue = item.value || 0;
+      const pctChange = baseValue > 0 && avg24h ? Math.round(((avg24h - baseValue) / baseValue) * 100) : 0;
+      return {
+        itemId, name: item.name, highestBuy, lowestSell, spread,
+        avg24h, vol24h, min24h, max24h, tradeCount, pctChange,
+        buyOfferCount: activeBuys.length, sellOfferCount: activeSells.length,
+        totalBuyVolume: activeBuys.reduce((s, o) => s + (o.quantity - o.fulfilled), 0),
+        totalSellVolume: activeSells.reduce((s, o) => s + (o.quantity - o.fulfilled), 0)
+      };
+    }).filter(Boolean);
+  }, [allOffers, priceSummary]);
+
+  // Reusable price hints renderer
+  const renderPriceHints = () => {
+    if (!modalItemId) return null;
+    if (itemBuyOffers.length === 0 && itemSellOffers.length === 0) return null;
+    return (
+      <div style={{
+        background: 'rgba(0,0,0,0.25)', borderRadius: '8px', padding: '12px',
+        marginBottom: '16px', fontSize: '12px'
+      }}>
+        <div style={{ fontWeight: 'bold', color: '#8a9ba8', marginBottom: '8px', fontSize: '13px' }}>
+          📊 Current Market Prices — <span style={{ fontWeight: 'normal', fontStyle: 'italic' }}>click to auto-fill</span>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div>
+            <div style={{ color: '#2ecc71', fontWeight: 'bold', marginBottom: '6px', fontSize: '11px' }}>🟢 Top Buy Offers</div>
+            {itemBuyOffers.length === 0 ? (
+              <div style={{ color: '#555', fontSize: '11px' }}>No active buy offers</div>
+            ) : (
+              itemBuyOffers.map((o, i) => (
+                <div key={i} onClick={() => setModalPrice(o.pricePerItem)}
+                  style={{ cursor: 'pointer', color: '#c5d3df', padding: '4px 6px', borderRadius: '4px', transition: 'background 0.2s', display: 'flex', justifyContent: 'space-between' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(46, 204, 113, 0.15)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ color: '#f1c40f' }}>{o.pricePerItem.toLocaleString()} gp</span>
+                  <span style={{ color: '#555' }}>x{o.quantity - o.fulfilled}</span>
+                </div>
+              ))
+            )}
+          </div>
+          <div>
+            <div style={{ color: '#E66100', fontWeight: 'bold', marginBottom: '6px', fontSize: '11px' }}>🟠 Top Sell Offers</div>
+            {itemSellOffers.length === 0 ? (
+              <div style={{ color: '#555', fontSize: '11px' }}>No active sell offers</div>
+            ) : (
+              itemSellOffers.map((o, i) => (
+                <div key={i} onClick={() => setModalPrice(o.pricePerItem)}
+                  style={{ cursor: 'pointer', color: '#c5d3df', padding: '4px 6px', borderRadius: '4px', transition: 'background 0.2s', display: 'flex', justifyContent: 'space-between' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(230, 97, 0, 0.15)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                  <span style={{ color: '#f1c40f' }}>{o.pricePerItem.toLocaleString()} gp</span>
+                  <span style={{ color: '#555' }}>x{o.quantity - o.fulfilled}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleOpenBuyModal = () => {
     setModalItemId('');
     setModalQuantity(1);
@@ -167,7 +268,7 @@ export default function MarketView({
       <div className="market-tabs" style={{ display: 'flex', gap: '10px', marginBottom: '20px', borderBottom: '1px solid #2a3b4c', paddingBottom: '15px' }}>
         {[
           { key: 'overview', label: '📊 Overview' },
-          { key: 'sell', label: '💰 Sell Offers' },
+          { key: 'analytics', label: '📈 Market Analytics' },
           { key: 'history', label: '📜 Trading History' }
         ].map(tab => (
           <button
@@ -627,52 +728,133 @@ export default function MarketView({
         </div>
       )}
 
-      {/* SELL OFFERS TAB */}
-      {marketScreen === 'sell' && (
+      {/* MARKET ANALYTICS TAB */}
+      {marketScreen === 'analytics' && (
         <div className="market-section">
-          <h3 style={{ color: '#F1FAEE', marginBottom: '16px' }}>💰 My Sell Offers</h3>
-          <div>
-            {marketOffers.filter(o => o.type === 'sell').length === 0 ? (
-              <div style={{ color: '#8a9ba8', fontSize: '13px', padding: '20px', textAlign: 'center' }}>
-                No sell offers yet
-              </div>
-            ) : (
-              marketOffers.filter(o => o.type === 'sell').map(offer => (
-                <div key={offer.id} className="market-offer-card">
-                  <div style={{ padding: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                      <span style={{ color: '#F1FAEE', fontWeight: 'bold' }}>
-                        {ITEMS[offer.itemId]?.name}
-                      </span>
-                      <span style={{ color: '#E66100' }}>{offer.pricePerItem.toLocaleString()} gp each</span>
-                    </div>
-                    <div style={{
-                      background: 'rgba(0,0,0,0.3)',
-                      borderRadius: '4px',
-                      height: '8px'
-                    }}>
-                      <div style={{
-                        width: `${(offer.fulfilled / offer.quantity) * 100}%`,
-                        height: '100%',
-                        background: '#E66100',
-                        borderRadius: '4px'
-                      }} />
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginTop: '8px',
-                      fontSize: '12px',
-                      color: '#8a9ba8'
-                    }}>
-                      <span>{offer.fulfilled}/{offer.quantity}</span>
-                      <span>Coins: {offer.collectedCoins.toLocaleString()}</span>
-                    </div>
+          {!inventory.marketAnalyticsUpgrade ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+              <h3 style={{ color: '#F1FAEE', marginBottom: '12px' }}>Market Analytics Locked</h3>
+              <p style={{ color: '#8a9ba8', marginBottom: '20px', maxWidth: '400px', margin: '0 auto 20px' }}>
+                Purchase the <strong style={{ color: '#f1c40f' }}>📈 Market Analytics</strong> upgrade from the <strong style={{ color: '#66FCF1' }}>General Store</strong> for <strong style={{ color: '#f1c40f' }}>500,000 gp</strong> to unlock this tab.
+              </p>
+              <p style={{ color: '#555', fontSize: '12px' }}>
+                View live prices, spreads, 24h volume, price trends and more for every tradeable item.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h3 style={{ color: '#F1FAEE', marginBottom: '16px', fontFamily: "'Carter One', cursive" }}>📈 Market Analytics</h3>
+
+              {/* Summary Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                {[
+                  { label: 'Active Offers', value: allOffers.filter(o => o.status === 'active').length, icon: '📋', color: '#66FCF1' },
+                  { label: 'Items Tracked', value: analyticsData.length, icon: '📦', color: '#f1c40f' },
+                  { label: '24h Trades', value: analyticsData.reduce((s, d) => s + d.tradeCount, 0), icon: '🔄', color: '#2ecc71' },
+                  { label: '24h Volume', value: analyticsData.reduce((s, d) => s + d.vol24h, 0), icon: '📊', color: '#E66100' }
+                ].map((stat, i) => (
+                  <div key={i} style={{
+                    background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '14px', textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: '20px', marginBottom: '4px' }}>{stat.icon}</div>
+                    <div style={{ color: stat.color, fontWeight: 'bold', fontSize: '18px' }}>{stat.value.toLocaleString()}</div>
+                    <div style={{ color: '#8a9ba8', fontSize: '11px' }}>{stat.label}</div>
                   </div>
+                ))}
+              </div>
+
+              {/* Search */}
+              <input
+                type="text"
+                placeholder="🔍 Search items..."
+                value={analyticsSearch}
+                onChange={e => setAnalyticsSearch(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px', background: '#111920', color: 'white',
+                  border: '1px solid rgba(102, 252, 241, 0.3)', borderRadius: '8px',
+                  marginBottom: '16px', fontFamily: 'Nunito, sans-serif', fontSize: '14px'
+                }}
+              />
+
+              {/* Table */}
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid #2a3b4c' }}>
+                      {[
+                        { key: 'name', label: 'Item' },
+                        { key: 'highestBuy', label: 'Buy Price' },
+                        { key: 'lowestSell', label: 'Sell Price' },
+                        { key: 'spread', label: 'Spread' },
+                        { key: 'avg24h', label: '24h Avg' },
+                        { key: 'vol24h', label: '24h Vol' },
+                        { key: 'pctChange', label: '% Change' },
+                        { key: 'buyOfferCount', label: 'Buy/Sell' }
+                      ].map(col => (
+                        <th key={col.key} onClick={() => {
+                          if (analyticsSortKey === col.key) {
+                            setAnalyticsSortDir(d => d === 'asc' ? 'desc' : 'asc');
+                          } else {
+                            setAnalyticsSortKey(col.key);
+                            setAnalyticsSortDir('desc');
+                          }
+                        }} style={{
+                          padding: '10px 8px', textAlign: 'left',
+                          color: analyticsSortKey === col.key ? '#66FCF1' : '#8a9ba8',
+                          cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap', fontWeight: 'bold'
+                        }}>
+                          {col.label} {analyticsSortKey === col.key ? (analyticsSortDir === 'asc' ? '▲' : '▼') : ''}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {analyticsData
+                      .filter(d => !analyticsSearch || d.name.toLowerCase().includes(analyticsSearch.toLowerCase()) || d.itemId.toLowerCase().includes(analyticsSearch.toLowerCase()))
+                      .sort((a, b) => {
+                        const dir = analyticsSortDir === 'asc' ? 1 : -1;
+                        const av = a[analyticsSortKey] ?? -Infinity;
+                        const bv = b[analyticsSortKey] ?? -Infinity;
+                        if (typeof av === 'string') return dir * av.localeCompare(bv);
+                        return dir * (av - bv);
+                      })
+                      .map(d => (
+                        <tr key={d.itemId} style={{ borderBottom: '1px solid rgba(42, 59, 76, 0.5)' }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(102, 252, 241, 0.05)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <td style={{ padding: '10px 8px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {ITEM_IMAGES[d.itemId] && <img src={ITEM_IMAGES[d.itemId]} alt="" style={{ width: '24px', height: '24px', objectFit: 'contain' }} />}
+                              <span style={{ color: '#F1FAEE', fontWeight: 600 }}>{d.name}</span>
+                            </div>
+                          </td>
+                          <td style={{ padding: '10px 8px', color: '#2ecc71', fontWeight: 'bold' }}>{d.highestBuy ? d.highestBuy.toLocaleString() : '—'}</td>
+                          <td style={{ padding: '10px 8px', color: '#E66100', fontWeight: 'bold' }}>{d.lowestSell ? d.lowestSell.toLocaleString() : '—'}</td>
+                          <td style={{ padding: '10px 8px', color: d.spread !== null ? (d.spread > 0 ? '#f1c40f' : '#FF1744') : '#555' }}>
+                            {d.spread !== null ? d.spread.toLocaleString() : '—'}
+                          </td>
+                          <td style={{ padding: '10px 8px', color: '#c5d3df' }}>{d.avg24h ? Math.round(d.avg24h).toLocaleString() : '—'}</td>
+                          <td style={{ padding: '10px 8px', color: '#c5d3df' }}>{d.vol24h > 0 ? d.vol24h.toLocaleString() : '—'}</td>
+                          <td style={{ padding: '10px 8px', color: d.pctChange >= 0 ? '#2ecc71' : '#FF1744', fontWeight: 'bold' }}>
+                            {d.pctChange >= 0 ? '▲' : '▼'} {Math.abs(d.pctChange)}%
+                          </td>
+                          <td style={{ padding: '10px 8px', color: '#8a9ba8' }}>
+                            <span style={{ color: '#2ecc71' }}>{d.buyOfferCount}</span> / <span style={{ color: '#E66100' }}>{d.sellOfferCount}</span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {analyticsData.length === 0 && (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#8a9ba8' }}>
+                  No market data available yet. Create some offers to see analytics!
                 </div>
-              ))
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
       )}
 
@@ -815,6 +997,9 @@ export default function MarketView({
                 </div>
               </div>
             )}
+
+            {/* Price Hints */}
+            {renderPriceHints()}
 
             <label style={{ color: '#F1FAEE', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>
               Quantity
@@ -1040,6 +1225,9 @@ export default function MarketView({
               </div>
             )}
 
+            {/* Price Hints */}
+            {renderPriceHints()}
+
             <label style={{ color: '#F1FAEE', display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: 'bold' }}>
               Quantity
             </label>
@@ -1219,6 +1407,9 @@ export default function MarketView({
                 </div>
               </div>
             </div>
+
+            {/* Price Hints */}
+            {renderPriceHints()}
 
             {/* MODE TABS */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>

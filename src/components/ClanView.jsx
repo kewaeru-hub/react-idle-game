@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDuration } from '../utils/gameHelpers';
 
 export default function ClanView({
@@ -28,11 +28,16 @@ export default function ClanView({
   getBrowseClans,
   requestJoinClan,
   reviewJoinRequest,
-  user
+  user,
+  clanJoinRequests,
+  loadJoinRequests
 }) {
   const [createClanName, setCreateClanName] = useState('');
   const [joinClanName, setJoinClanName] = useState('');
   const [showBrowsePopup, setShowBrowsePopup] = useState(false);
+  const [browseClansList, setBrowseClansList] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
   const [invitePlayerName, setInvitePlayerName] = useState('');
   const [recruitmentMessage, setRecruitmentMessage] = useState(clan?.recruitment?.message || 'Welcome to our clan!');
   
@@ -40,26 +45,46 @@ export default function ClanView({
   const [selectedVaultItem, setSelectedVaultItem] = useState(null);
   const [vaultDepositQuantity, setVaultDepositQuantity] = useState(1);
 
+  // Load join requests when manage tab is opened
+  useEffect(() => {
+    if (clanScreen === 'manage' && loadJoinRequests) {
+      loadJoinRequests();
+    }
+  }, [clanScreen, loadJoinRequests]);
+
   // Handle create clan
-  const handleCreateClan = () => {
+  const handleCreateClan = async () => {
     if (!createClanName.trim()) {
       alert('Please enter a clan name!');
       return;
     }
-    if (createClan(createClanName, inventory, setInventory)) {
+    const result = await createClan(createClanName, inventory, setInventory);
+    if (result) {
       setCreateClanName('');
     }
   };
 
   // Handle join clan by name
-  const handleJoinClan = () => {
+  const handleJoinClan = async () => {
     if (!joinClanName.trim()) {
       alert('Please enter a clan name!');
       return;
     }
-    if (joinClan(joinClanName, skills)) {
+    setJoinLoading(true);
+    const result = await joinClan(joinClanName, skills);
+    if (result) {
       setJoinClanName('');
     }
+    setJoinLoading(false);
+  };
+
+  // Handle opening browse popup
+  const handleOpenBrowse = async () => {
+    setShowBrowsePopup(true);
+    setBrowseLoading(true);
+    const clans = await getBrowseClans();
+    setBrowseClansList(clans || []);
+    setBrowseLoading(false);
   };
 
   // Format item name from id
@@ -170,13 +195,14 @@ export default function ClanView({
               <button
                 className="btn-action"
                 onClick={handleJoinClan}
-                style={{ width: '100%', marginBottom: '8px' }}
+                disabled={joinLoading}
+                style={{ width: '100%', marginBottom: '8px', opacity: joinLoading ? 0.6 : 1 }}
               >
-                Join Clan
+                {joinLoading ? 'Joining...' : 'Join Clan'}
               </button>
               <button
                 className="btn-action"
-                onClick={() => setShowBrowsePopup(true)}
+                onClick={handleOpenBrowse}
                 style={{
                   width: '100%',
                   background: 'rgba(255,255,255,0.05)',
@@ -205,8 +231,12 @@ export default function ClanView({
                   <button onClick={() => setShowBrowsePopup(false)} style={{ padding: '4px 10px', background: 'none', border: '1px solid #555', color: '#aaa', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {(getBrowseClans ? getBrowseClans() : []).map(c => (
-                    <div key={c.name} style={{
+                  {browseLoading ? (
+                    <div style={{ textAlign: 'center', padding: '30px', color: '#8899aa' }}>Loading clans...</div>
+                  ) : browseClansList.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '30px', color: '#8899aa' }}>No clans found. Be the first to create one!</div>
+                  ) : browseClansList.map(c => (
+                    <div key={c.id || c.name} style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '1px solid rgba(102,252,241,0.2)',
                       borderRadius: '8px',
@@ -223,7 +253,7 @@ export default function ClanView({
                         </span>
                       </div>
                       <div style={{ fontSize: '12px', color: '#7b95a6', marginBottom: '6px' }}>
-                        👥 {c.memberCount}/{c.maxMembers} members · 👑 {c.leader} · ⚔️ Avg Combat: {c.avgCombatLevel}
+                        👥 {c.memberCount}/{c.maxMembers} members · 👑 {c.leader}
                       </div>
                       <div style={{ fontSize: '12px', color: '#8899aa', fontStyle: 'italic', marginBottom: '8px' }}>
                         "{c.recruitment.message}"
@@ -231,7 +261,10 @@ export default function ClanView({
                       {c.recruitment.open && (
                         <button
                           className="btn-action"
-                          onClick={() => { joinClan(c.name, skills); setShowBrowsePopup(false); }}
+                          onClick={async () => { 
+                            const result = await joinClan(c.name, skills); 
+                            if (result) setShowBrowsePopup(false); 
+                          }}
                           style={{ padding: '6px 16px', fontSize: '12px', width: '100%' }}
                         >
                           Join {c.name}
@@ -300,7 +333,7 @@ export default function ClanView({
         >
           ⬆️ Upgrades
         </button>
-        {playerMember && playerMember.rank === 'Leader' && (
+        {playerMember && ['Leader', 'Officer'].includes(playerMember.rank) && (
           <button
             className={`clan-tab ${clanScreen === 'manage' ? 'active' : ''}`}
             onClick={() => setClanScreen('manage')}
@@ -722,12 +755,21 @@ export default function ClanView({
           <p style={{ color: '#8899aa', fontSize: '0.85rem', marginBottom: '20px' }}>
             Spend Clan Credits (💎 {clan?.credits || 0}) to unlock permanent boosts for all members.
           </p>
+          {playerMember && !['Officer', 'Leader'].includes(playerMember.rank) && (
+            <div style={{
+              background: 'rgba(255, 23, 68, 0.1)', border: '1px solid rgba(255, 23, 68, 0.3)',
+              borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#ff1744', fontSize: '0.85rem'
+            }}>
+              🔒 Only Officers and Leaders can purchase clan upgrades. Your rank: <strong>{playerMember.rank}</strong>
+            </div>
+          )}
           {clan?.upgrades ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
               {Object.entries(clan.upgrades).map(([key, upgrade]) => {
               const cost = upgrade.costPerLevel * (upgrade.level + 1);
               const isMaxed = upgrade.level >= upgrade.maxLevel;
               const canAfford = clan.credits >= cost;
+              const canPurchase = playerMember && ['Officer', 'Leader'].includes(playerMember.rank);
               const totalEffect = upgrade.level * upgrade.effectPerLevel;
 
               return (
@@ -771,14 +813,14 @@ export default function ClanView({
                     <button
                       className="btn-action"
                       onClick={() => purchaseUpgrade(key)}
-                      disabled={!canAfford}
+                      disabled={!canAfford || !canPurchase}
                       style={{
                         width: '100%', padding: '8px',
-                        opacity: canAfford ? 1 : 0.5,
-                        cursor: canAfford ? 'pointer' : 'not-allowed'
+                        opacity: (canAfford && canPurchase) ? 1 : 0.5,
+                        cursor: (canAfford && canPurchase) ? 'pointer' : 'not-allowed'
                       }}
                     >
-                      Upgrade — 💎 {cost}
+                      {!canPurchase ? '🔒 Officer+ Only' : `Upgrade — 💎 ${cost}`}
                     </button>
                   )}
                 </div>
@@ -794,7 +836,7 @@ export default function ClanView({
       {/* TAB: MANAGE */}
       {clanScreen === 'manage' && (
         <div style={{ minHeight: '300px' }}>
-          {playerMember?.rank === 'Leader' ? (
+          {['Leader', 'Officer'].includes(playerMember?.rank) ? (
             <>
               <h3 style={{ marginTop: 0, marginBottom: '20px', color: '#66FCF1' }}>⚙️ Clan Management</h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -871,40 +913,40 @@ export default function ClanView({
               </button>
             </div>
 
-            {/* Join Requests */}
+            {/* Join Requests - from Supabase */}
             <div className="clan-manage-card" style={{ gridColumn: '1 / -1' }}>
               <h4 style={{ marginTop: 0, marginBottom: '12px', color: '#F1FAEE' }}>
                 📨 Join Requests
-                {(clan.joinRequests || []).length > 0 && (
+                {(clanJoinRequests || []).length > 0 && (
                   <span style={{ 
                     background: '#e74c3c', color: 'white', borderRadius: '50%',
                     width: '20px', height: '20px', fontSize: '11px', fontWeight: 700,
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     marginLeft: '8px', verticalAlign: 'middle'
                   }}>
-                    {(clan.joinRequests || []).length}
+                    {(clanJoinRequests || []).length}
                   </span>
                 )}
               </h4>
-              {(clan.joinRequests || []).length === 0 ? (
+              {(clanJoinRequests || []).length === 0 ? (
                 <p style={{ color: '#555', fontSize: '13px' }}>No pending join requests.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {(clan.joinRequests || []).map((req, idx) => (
-                    <div key={idx} style={{
+                  {(clanJoinRequests || []).map((req) => (
+                    <div key={req.id} style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '1px solid rgba(102,252,241,0.2)',
                       borderRadius: '8px',
                       padding: '12px'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontWeight: 600, color: '#F1FAEE', fontSize: '14px' }}>👤 {req.playerName}</span>
+                        <span style={{ fontWeight: 600, color: '#F1FAEE', fontSize: '14px' }}>👤 {req.username}</span>
                         <span style={{ fontSize: '11px', color: '#7b95a6' }}>
-                          {new Date(req.requestedAt).toLocaleDateString()}
+                          {new Date(req.requested_at).toLocaleDateString()}
                         </span>
                       </div>
                       <div style={{ fontSize: '12px', color: '#8899aa', marginBottom: '4px' }}>
-                        📊 Total Level: <strong style={{ color: '#66FCF1' }}>{req.totalLevel}</strong> · ⚔️ Combat: <strong style={{ color: '#f1c40f' }}>{req.combatLevel}</strong>
+                        📊 Total Level: <strong style={{ color: '#66FCF1' }}>{req.total_level}</strong> · ⚔️ Combat: <strong style={{ color: '#f1c40f' }}>{req.combat_level}</strong>
                       </div>
                       {req.message && (
                         <div style={{ fontSize: '12px', color: '#7b95a6', fontStyle: 'italic', marginBottom: '8px' }}>
@@ -913,7 +955,7 @@ export default function ClanView({
                       )}
                       <div style={{ display: 'flex', gap: '8px' }}>
                         <button
-                          onClick={() => reviewJoinRequest(idx, true)}
+                          onClick={() => reviewJoinRequest(req.id, true)}
                           style={{
                             flex: 1, padding: '6px', fontSize: '12px', fontWeight: 700,
                             background: '#4caf50', color: 'white', border: 'none',
@@ -923,7 +965,7 @@ export default function ClanView({
                           ✓ Accept
                         </button>
                         <button
-                          onClick={() => reviewJoinRequest(idx, false)}
+                          onClick={() => reviewJoinRequest(req.id, false)}
                           style={{
                             flex: 1, padding: '6px', fontSize: '12px', fontWeight: 700,
                             background: '#e74c3c', color: 'white', border: 'none',

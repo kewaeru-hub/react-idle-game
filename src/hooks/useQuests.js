@@ -188,6 +188,40 @@ export function useQuests(skills, inventory) {
   const maxDailyRerolls = hasQuestUpgrade ? 10 : 6;
   const maxWeeklyRerolls = hasQuestUpgrade ? 8 : 4;
 
+  // Expand quests when quest upgrade is purchased mid-day
+  const prevHasUpgradeRef = useRef(hasQuestUpgrade);
+  useEffect(() => {
+    const wasUpgraded = !prevHasUpgradeRef.current && hasQuestUpgrade;
+    prevHasUpgradeRef.current = hasQuestUpgrade;
+    if (wasUpgraded) {
+      // Expand daily quests from 6 to 10
+      setDailyQuests(prev => {
+        if (prev.length >= 10) return prev;
+        const existingActionIds = prev.map(q => q.actionId);
+        const additional = [];
+        for (let i = prev.length; i < 10; i++) {
+          const quest = generateQuest('daily', skills, [...existingActionIds, ...additional.map(q => q.actionId)]);
+          if (quest) additional.push(quest);
+        }
+        return [...prev, ...additional];
+      });
+      // Expand weekly quests from 4 to 6
+      setWeeklyQuests(prev => {
+        if (prev.length >= 6) return prev;
+        const existingActionIds = [...dailyQuests.map(q => q.actionId), ...prev.map(q => q.actionId)];
+        const additional = [];
+        for (let i = prev.length; i < 6; i++) {
+          const quest = generateQuest('weekly', skills, [...existingActionIds, ...additional.map(q => q.actionId)]);
+          if (quest) additional.push(quest);
+        }
+        return [...prev, ...additional];
+      });
+      // Grant extra rerolls
+      setDailyRerolls(prev => Math.max(prev, 10));
+      setWeeklyRerolls(prev => Math.max(prev, 8));
+    }
+  }, [hasQuestUpgrade, skills, dailyQuests]);
+
   // Generate all daily quests
   const generateDailyQuests = useCallback((clanMemberCount = 0) => {
     const quests = [];

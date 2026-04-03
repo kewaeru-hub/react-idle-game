@@ -755,7 +755,7 @@ export default function App({ user, signOut }) {
   useEffect(() => { slayerRef.current = { currentTask: slayer.currentTask, slayerPoints: slayer.slayerPoints, consecutive: slayer.consecutive }; }, [slayer.currentTask, slayer.slayerPoints, slayer.consecutive]);
 
   // Shop functions
-  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade } = useShop(setInventory, inventory);
+  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade, buyMarketAnalytics } = useShop(setInventory, inventory);
 
   // Quest system
   const quests = useQuests(skills, inventory);
@@ -779,8 +779,11 @@ export default function App({ user, signOut }) {
     };
   }, [quests.dailyQuests, quests.weeklyQuests, quests.clanDailyQuests, quests.clanWeeklyQuests, quests.dailyRerolls, quests.weeklyRerolls, quests.lastDailyReset, quests.lastWeeklyReset]);
 
+  // Get username early for useClan & useMarket
+  const marketUsername = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player';
+
   // Clan system
-  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment, getBrowseClans, requestJoinClan, reviewJoinRequest } = useClan();
+  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment, getBrowseClans, requestJoinClan, reviewJoinRequest, clanJoinRequests, loadJoinRequests } = useClan(user?.id, marketUsername);
 
   // Refs for clan
   const clanRef = useRef(clan);
@@ -804,7 +807,6 @@ export default function App({ user, signOut }) {
   }, [clan, clanMemberCount]);
 
   // Market system (online, Supabase-based)
-  const marketUsername = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player';
   const { marketOffers, setMarketOffers, marketSlots, setMarketSlots, orderHistory, setOrderHistory, marketScreen, setMarketScreen, createBuyOffer, createSellOffer, cancelOffer, collectOffer, collectAllOffers, purchaseMarketSlot, processMarketTick, allOffers, priceSummary, loading: marketLoading } = useMarket(user?.id, marketUsername);
 
   // Ref for market save/load
@@ -844,7 +846,7 @@ export default function App({ user, signOut }) {
         <main className="content-area">
           {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} claimAllTools={claimAllTools} claimedTools={claimedTools} TOOL_SKILLS={TOOL_SKILLS} monsterStats={monsterStats} ACTIONS={ACTIONS} ITEM_IMAGES={ITEM_IMAGES} combatLevel={combatLevel} />}
           {screen === 'inventory' && <InventoryView inventory={inventory} ARMOR={ARMOR} equipment={equipment} equipmentAmounts={equipmentAmounts} WEAPONS={WEAPONS} AMMO={AMMO} toggleEquip={toggleEquip} combatStyle={combatStyle} setCombatStyle={setCombatStyle} sellItemToShop={sellItemToShop} setActivePopup={setActivePopup} depositToVault={depositToVault} clan={clan} setInventory={setInventory} inventoryOrder={inventoryOrder} setInventoryOrder={setInventoryOrder} />}
-          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} buyAutoEat={buyAutoEat} buyQuestUpgrade={buyQuestUpgrade} />}
+          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} buyAutoEat={buyAutoEat} buyQuestUpgrade={buyQuestUpgrade} buyMarketAnalytics={buyMarketAnalytics} />}
           {screen === 'clan' && (
             <ClanView 
               clan={clan} clanScreen={clanScreen} setClanScreen={setClanScreen}
@@ -862,6 +864,8 @@ export default function App({ user, signOut }) {
               requestJoinClan={requestJoinClan}
               reviewJoinRequest={reviewJoinRequest}
               user={user}
+              clanJoinRequests={clanJoinRequests}
+              loadJoinRequests={loadJoinRequests}
             />
           )}
 

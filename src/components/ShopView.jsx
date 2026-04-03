@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SHOP_STOCK, ITEMS, ITEM_IMAGES } from '../data/gameData';
 import ItemTooltip from './ItemTooltip'; 
 
-export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade }) {
+export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade, buyMarketAnalytics }) {
   const [activeTab, setActiveTab] = useState('items');
   const [purchaseAmounts, setPurchaseAmounts] = useState({});
   const [upgradeAmount, setUpgradeAmount] = useState(1);
@@ -286,6 +286,41 @@ export default function ShopView({ inventory, buyItem, buyUpgrade, buyOfflineUpg
             })() : (
               <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px', textAlign: 'center' }}>
                 <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>✓ Quest Upgrade unlocked!</span>
+              </div>
+            )}
+          </div>
+
+          {/* Market Analytics Upgrade */}
+          <div className="card" style={{ padding: '20px', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              <div>
+                <h3 style={{ color: 'var(--text-primary)', marginBottom: '5px' }}>📈 Market Analytics</h3>
+                <p style={{ color: '#c5d3df', fontSize: '14px', marginBottom: 0 }}>
+                  Unlock the Market Analytics tab in the Grand Market. View live prices, spreads, 24h volume, price trends and more for every tradeable item.
+                </p>
+              </div>
+            </div>
+            {!(inventory.marketAnalyticsUpgrade) ? (() => {
+              const cost = 500_000;
+              const canAfford = (inventory.coins || 0) >= cost;
+              return (
+                <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontWeight: 'bold', color: 'white' }}>Market Analytics</span>
+                      <p style={{ fontSize: '12px', color: '#c5d3df', margin: '5px 0 0 0' }}>Advanced price data &amp; market intelligence</p>
+                    </div>
+                    <button
+                      onClick={() => buyMarketAnalytics(cost)}
+                      disabled={!canAfford}
+                      style={{ padding: '8px 20px', background: canAfford ? '#2ecc71' : '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: canAfford ? 'pointer' : 'not-allowed', fontWeight: 'bold', opacity: canAfford ? 1 : 0.5 }}
+                    >Buy ({cost.toLocaleString()} gp)</button>
+                  </div>
+                </div>
+              );
+            })() : (
+              <div style={{ borderTop: '1px solid #2a3b4c', paddingTop: '15px', textAlign: 'center' }}>
+                <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>✓ Market Analytics unlocked!</span>
               </div>
             )}
           </div>

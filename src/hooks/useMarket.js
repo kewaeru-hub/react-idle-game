@@ -155,7 +155,9 @@ export function useMarket(userId, username) {
           if (offer) {
             setAllOffers(prev => prev.map(o => o.id === offer.id ? offer : o).filter(o => o.status === 'active'));
             if (offer.userId === userIdRef.current) {
-              setMarketOffers(prev => prev.map(o => o.id === offer.id ? offer : o));
+              setMarketOffers(prev => prev.map(o => o.id === offer.id ? offer : o)
+                .filter(o => !(o.fulfilled >= o.quantity && o.collectedItems === 0 && o.collectedCoins === 0))
+              );
             }
           }
         } else if (payload.eventType === 'DELETE') {
@@ -196,7 +198,9 @@ export function useMarket(userId, username) {
       .order('created_at', { ascending: false });
 
     if (!error && data) {
-      setMarketOffers(data.map(mapOfferFromDb));
+      setMarketOffers(data.map(mapOfferFromDb).filter(o =>
+        !(o.fulfilled >= o.quantity && o.collectedItems === 0 && o.collectedCoins === 0)
+      ));
     }
   }, [userId]);
 
