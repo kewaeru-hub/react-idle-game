@@ -21,10 +21,18 @@ export default function ClanView({
   inventory,
   setInventory,
   ITEM_IMAGES,
-  skills
+  skills,
+  quests,
+  setClan,
+  addXp,
+  getBrowseClans,
+  requestJoinClan,
+  reviewJoinRequest,
+  user
 }) {
   const [createClanName, setCreateClanName] = useState('');
   const [joinClanName, setJoinClanName] = useState('');
+  const [showBrowsePopup, setShowBrowsePopup] = useState(false);
   const [invitePlayerName, setInvitePlayerName] = useState('');
   const [recruitmentMessage, setRecruitmentMessage] = useState(clan?.recruitment?.message || 'Welcome to our clan!');
   
@@ -43,13 +51,13 @@ export default function ClanView({
     }
   };
 
-  // Handle join clan
+  // Handle join clan by name
   const handleJoinClan = () => {
     if (!joinClanName.trim()) {
       alert('Please enter a clan name!');
       return;
     }
-    if (joinClan(joinClanName)) {
+    if (joinClan(joinClanName, skills)) {
       setJoinClanName('');
     }
   };
@@ -151,20 +159,90 @@ export default function ClanView({
             <div className="clan-action-box">
               <h3 style={{ marginTop: 0, color: '#66FCF1' }}>Join Clan</h3>
               <p style={{ fontSize: '0.85rem', color: '#8899aa', marginBottom: '12px' }}>
-                Join an existing clan. Try: <strong>Warriors Guild</strong>
+                Enter a clan name to join, or browse available clans.
               </p>
               <input
                 type="text"
                 placeholder="Clan name"
                 value={joinClanName}
                 onChange={(e) => setJoinClanName(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleJoinClan()}
               />
-              <button className="btn-action" onClick={handleJoinClan}>
+              <button
+                className="btn-action"
+                onClick={handleJoinClan}
+                style={{ width: '100%', marginBottom: '8px' }}
+              >
                 Join Clan
+              </button>
+              <button
+                className="btn-action"
+                onClick={() => setShowBrowsePopup(true)}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(102,252,241,0.4)',
+                  color: '#66FCF1'
+                }}
+              >
+                🔍 Browse Clans
               </button>
             </div>
           </div>
+
+          {/* Browse Clans Popup */}
+          {showBrowsePopup && (
+            <div style={{
+              position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+              backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
+            }} onClick={() => setShowBrowsePopup(false)}>
+              <div style={{
+                backgroundColor: '#111920', border: '2px solid #208b76', borderRadius: '12px',
+                width: '500px', maxWidth: '90vw', maxHeight: '80vh', padding: '24px',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.8)', overflowY: 'auto'
+              }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #2a3b4c', paddingBottom: '12px' }}>
+                  <h3 style={{ margin: 0, color: '#66FCF1' }}>🔍 Browse Clans</h3>
+                  <button onClick={() => setShowBrowsePopup(false)} style={{ padding: '4px 10px', background: 'none', border: '1px solid #555', color: '#aaa', borderRadius: '4px', cursor: 'pointer' }}>✕</button>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(getBrowseClans ? getBrowseClans() : []).map(c => (
+                    <div key={c.name} style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(102,252,241,0.2)',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      transition: 'border-color 0.2s'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <div>
+                          <span style={{ fontWeight: 600, color: '#F1FAEE', fontSize: '14px' }}>{c.name}</span>
+                          <span style={{ fontSize: '11px', color: '#8899aa', marginLeft: '8px' }}>⭐ Lv. {c.level}</span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: c.recruitment.open ? '#4caf50' : '#ff1744' }}>
+                          {c.recruitment.open ? '🟢 Open' : '🔴 Closed'}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#7b95a6', marginBottom: '6px' }}>
+                        👥 {c.memberCount}/{c.maxMembers} members · 👑 {c.leader} · ⚔️ Avg Combat: {c.avgCombatLevel}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#8899aa', fontStyle: 'italic', marginBottom: '8px' }}>
+                        "{c.recruitment.message}"
+                      </div>
+                      {c.recruitment.open && (
+                        <button
+                          className="btn-action"
+                          onClick={() => { joinClan(c.name, skills); setShowBrowsePopup(false); }}
+                          style={{ padding: '6px 16px', fontSize: '12px', width: '100%' }}
+                        >
+                          Join {c.name}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -418,54 +496,84 @@ export default function ClanView({
       {/* TAB: QUESTS */}
       {clanScreen === 'quests' && (
         <div>
-          <h3 style={{ marginTop: '0', marginBottom: '20px', color: '#66FCF1' }}>Clan Quests</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px' }}>
-            {clan.quests.map((quest) => {
-              const progressPerc = Math.min(100, (quest.progress / quest.target) * 100);
-              return (
-                <div key={quest.id} className="clan-quest-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                    <div>
-                      <div style={{ fontWeight: 600, color: '#F1FAEE', marginBottom: '4px' }}>{quest.title}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#8899aa' }}>{quest.description}</div>
-                    </div>
-                    <div style={{ textAlign: 'right', whiteSpace: 'nowrap', marginLeft: '12px' }}>
-                      <div style={{ fontSize: '0.75rem', color: '#8899aa', marginBottom: '4px' }}>
-                        {quest.progress} / {quest.target}
+          {/* Personal Clan Daily Quests */}
+          {quests && (
+            <>
+              <h3 style={{ marginTop: '0', marginBottom: '12px', color: '#66FCF1' }}>📅 Clan Group Quests Daily</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginBottom: '24px' }}>
+                {(quests.clanDailyQuests || []).length === 0 ? (
+                  <div style={{ color: '#555', fontSize: '13px', padding: '12px', textAlign: 'center' }}>No clan daily quests yet. Check back after the next reset!</div>
+                ) : (quests.clanDailyQuests || []).map(quest => {
+                  const progressPerc = Math.min(100, (quest.progress / quest.target) * 100);
+                  return (
+                    <div key={quest.id} style={{
+                      background: quest.claimed ? 'rgba(76, 175, 80, 0.1)' : quest.completed ? 'rgba(102, 252, 241, 0.08)' : 'rgba(0, 0, 0, 0.25)',
+                      border: `1px solid ${quest.claimed ? 'rgba(76, 175, 80, 0.4)' : quest.completed ? 'rgba(102, 252, 241, 0.5)' : 'rgba(69, 162, 158, 0.3)'}`,
+                      borderRadius: '8px', padding: '12px 14px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#F1FAEE' }}>
+                          {quest.verb} {quest.target.toLocaleString()}x {quest.actionName}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {quest.reward?.clanCredits && <span style={{ fontSize: '12px', color: '#FFD700' }}>💎 {quest.reward.clanCredits}</span>}
+                          {quest.reward?.coins && <span style={{ fontSize: '12px', color: '#FFD700' }}>💰 {quest.reward.coins.toLocaleString()}</span>}
+                        </div>
                       </div>
-                      <div style={{ color: '#FFD700', fontWeight: 600 }}>💎 {quest.reward}</div>
+                      <div style={{ height: '6px', borderRadius: '3px', background: 'rgba(11,12,16,0.8)', overflow: 'hidden', marginBottom: '6px' }}>
+                        <div style={{ height: '100%', width: `${progressPerc}%`, background: quest.completed ? '#4caf50' : '#66FCF1', borderRadius: '3px', transition: 'width 0.3s' }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', color: '#8899aa' }}>{quest.progress.toLocaleString()} / {quest.target.toLocaleString()} ({Math.round(progressPerc)}%)</span>
+                        {quest.completed && !quest.claimed && (
+                          <button onClick={() => quests.claimClanQuestReward?.(quest.id, setClan)} style={{ padding: '4px 12px', fontSize: '12px', fontWeight: 700, background: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Claim!</button>
+                        )}
+                        {quest.claimed && <span style={{ fontSize: '12px', color: '#4caf50', fontWeight: 600 }}>✓ Claimed</span>}
+                      </div>
                     </div>
-                  </div>
+                  );
+                })}
+              </div>
 
-                  <div className="clan-quest-progress">
-                    <div
-                      className="clan-quest-fill"
-                      style={{ width: `${progressPerc}%` }}
-                    ></div>
-                  </div>
+              <h3 style={{ marginTop: '0', marginBottom: '12px', color: '#66FCF1' }}>📆 Clan Group Quests Weekly</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '10px', marginBottom: '24px' }}>
+                {(quests.clanWeeklyQuests || []).length === 0 ? (
+                  <div style={{ color: '#555', fontSize: '13px', padding: '12px', textAlign: 'center' }}>No clan weekly quests yet. Check back after the next reset!</div>
+                ) : (quests.clanWeeklyQuests || []).map(quest => {
+                  const progressPerc = Math.min(100, (quest.progress / quest.target) * 100);
+                  return (
+                    <div key={quest.id} style={{
+                      background: quest.claimed ? 'rgba(76, 175, 80, 0.1)' : quest.completed ? 'rgba(102, 252, 241, 0.08)' : 'rgba(0, 0, 0, 0.25)',
+                      border: `1px solid ${quest.claimed ? 'rgba(76, 175, 80, 0.4)' : quest.completed ? 'rgba(102, 252, 241, 0.5)' : 'rgba(69, 162, 158, 0.3)'}`,
+                      borderRadius: '8px', padding: '12px 14px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <div style={{ fontSize: '14px', fontWeight: 600, color: '#F1FAEE' }}>
+                          {quest.verb} {quest.target.toLocaleString()}x {quest.actionName}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {quest.reward?.clanCredits && <span style={{ fontSize: '12px', color: '#FFD700' }}>💎 {quest.reward.clanCredits}</span>}
+                          {quest.reward?.coins && <span style={{ fontSize: '12px', color: '#FFD700' }}>💰 {quest.reward.coins.toLocaleString()}</span>}
+                        </div>
+                      </div>
+                      <div style={{ height: '6px', borderRadius: '3px', background: 'rgba(11,12,16,0.8)', overflow: 'hidden', marginBottom: '6px' }}>
+                        <div style={{ height: '100%', width: `${progressPerc}%`, background: quest.completed ? '#4caf50' : '#66FCF1', borderRadius: '3px', transition: 'width 0.3s' }} />
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '12px', color: '#8899aa' }}>{quest.progress.toLocaleString()} / {quest.target.toLocaleString()} ({Math.round(progressPerc)}%)</span>
+                        {quest.completed && !quest.claimed && (
+                          <button onClick={() => quests.claimClanQuestReward?.(quest.id, setClan)} style={{ padding: '4px 12px', fontSize: '12px', fontWeight: 700, background: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Claim!</button>
+                        )}
+                        {quest.claimed && <span style={{ fontSize: '12px', color: '#4caf50', fontWeight: 600 }}>✓ Claimed</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
 
-                  <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ fontSize: '0.8rem', color: '#8899aa' }}>{Math.round(progressPerc)}% Complete</div>
-                    {quest.progress >= quest.target ? (
-                      quest.claimed ? (
-                        <div style={{ fontSize: '0.85rem', color: '#4caf50', fontWeight: 600 }}>✓ Claimed</div>
-                      ) : (
-                        <button
-                          className="btn-action"
-                          onClick={() => claimQuestReward(quest.id)}
-                          style={{ padding: '4px 12px', fontSize: '0.85rem' }}
-                        >
-                          Claim Reward
-                        </button>
-                      )
-                    ) : (
-                      <div style={{ fontSize: '0.85rem', color: '#8899aa' }}>In Progress</div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+
         </div>
       )}
 
@@ -761,6 +869,74 @@ export default function ClanView({
               }} style={{ width: '100%' }}>
                 Save Message
               </button>
+            </div>
+
+            {/* Join Requests */}
+            <div className="clan-manage-card" style={{ gridColumn: '1 / -1' }}>
+              <h4 style={{ marginTop: 0, marginBottom: '12px', color: '#F1FAEE' }}>
+                📨 Join Requests
+                {(clan.joinRequests || []).length > 0 && (
+                  <span style={{ 
+                    background: '#e74c3c', color: 'white', borderRadius: '50%',
+                    width: '20px', height: '20px', fontSize: '11px', fontWeight: 700,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    marginLeft: '8px', verticalAlign: 'middle'
+                  }}>
+                    {(clan.joinRequests || []).length}
+                  </span>
+                )}
+              </h4>
+              {(clan.joinRequests || []).length === 0 ? (
+                <p style={{ color: '#555', fontSize: '13px' }}>No pending join requests.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {(clan.joinRequests || []).map((req, idx) => (
+                    <div key={idx} style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(102,252,241,0.2)',
+                      borderRadius: '8px',
+                      padding: '12px'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontWeight: 600, color: '#F1FAEE', fontSize: '14px' }}>👤 {req.playerName}</span>
+                        <span style={{ fontSize: '11px', color: '#7b95a6' }}>
+                          {new Date(req.requestedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#8899aa', marginBottom: '4px' }}>
+                        📊 Total Level: <strong style={{ color: '#66FCF1' }}>{req.totalLevel}</strong> · ⚔️ Combat: <strong style={{ color: '#f1c40f' }}>{req.combatLevel}</strong>
+                      </div>
+                      {req.message && (
+                        <div style={{ fontSize: '12px', color: '#7b95a6', fontStyle: 'italic', marginBottom: '8px' }}>
+                          "{req.message}"
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => reviewJoinRequest(idx, true)}
+                          style={{
+                            flex: 1, padding: '6px', fontSize: '12px', fontWeight: 700,
+                            background: '#4caf50', color: 'white', border: 'none',
+                            borderRadius: '4px', cursor: 'pointer'
+                          }}
+                        >
+                          ✓ Accept
+                        </button>
+                        <button
+                          onClick={() => reviewJoinRequest(idx, false)}
+                          style={{
+                            flex: 1, padding: '6px', fontSize: '12px', fontWeight: 700,
+                            background: '#e74c3c', color: 'white', border: 'none',
+                            borderRadius: '4px', cursor: 'pointer'
+                          }}
+                        >
+                          ✕ Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             </div>
             </>

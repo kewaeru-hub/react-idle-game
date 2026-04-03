@@ -26,6 +26,7 @@ export default function ProfileView({ skills, inventory, user, claimAllTools, cl
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const [showCollectionLog, setShowCollectionLog] = useState(false);
   const [selectedMonster, setSelectedMonster] = useState(null);
+  const [collapsedCategories, setCollapsedCategories] = useState(new Set());
 
   // Group combat monsters by category
   const monstersByCategory = useMemo(() => {
@@ -334,19 +335,38 @@ export default function ProfileView({ skills, inventory, user, claimAllTools, cl
                 {CATEGORY_ORDER.map(cat => {
                   const monsters = (monstersByCategory && monstersByCategory[cat]) || [];
                   if (monsters.length === 0) return null;
+                  const isCollapsed = collapsedCategories.has(cat);
+                  const killCount = monsters.reduce((sum, m) => sum + (monsterStats[m.id]?.kills || 0), 0);
                   return (
                     <div key={cat} style={{ marginBottom: '4px' }}>
-                      <div style={{
-                        padding: '6px 14px',
-                        fontSize: '11px',
-                        fontWeight: 'bold',
-                        textTransform: 'uppercase',
-                        color: CATEGORY_COLORS[cat] || '#7b95a6',
-                        letterSpacing: '0.5px'
-                      }}>
-                        {cat}
+                      <div 
+                        onClick={() => setCollapsedCategories(prev => {
+                          const next = new Set(prev);
+                          if (next.has(cat)) next.delete(cat); else next.add(cat);
+                          return next;
+                        })}
+                        style={{
+                          padding: '6px 14px',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          textTransform: 'uppercase',
+                          color: CATEGORY_COLORS[cat] || '#7b95a6',
+                          letterSpacing: '0.5px',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          userSelect: 'none',
+                          transition: 'background 0.15s',
+                          borderRadius: '4px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <span>{isCollapsed ? '▶' : '▼'} {cat}</span>
+                        {killCount > 0 && <span style={{ fontSize: '10px', color: '#7b95a6', fontWeight: 'normal' }}>{killCount} kills</span>}
                       </div>
-                      {monsters.map(m => {
+                      {!isCollapsed && monsters.map(m => {
                         const stats = monsterStats[m.id];
                         const hasKills = stats && stats.kills > 0;
                         const isSelected = selectedMonster === m.id;

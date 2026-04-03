@@ -13,7 +13,7 @@ export default function FightCaveView({
   eatFood, drinkPotion, getItemCount, stopAction, getCurrentWeapon, xpDrops = [], quickPrayers = [],
   startCombat, activeWave, engine,
   combatStyle, setCombatStyle, availableCombatStyles, equipment, WEAPONS, ARMOR, AMMO,
-  combatLog = []
+  combatLog = [], username = 'Player'
 }) {
   // Read enemies directly from engine
   const enemies = engine?.enemies || [];
@@ -153,7 +153,7 @@ export default function FightCaveView({
       <div className="card combat-player-card" style={{ flex: '0 0 auto', width: '380px', minHeight: '640px', backgroundColor: '#202a33', position: 'relative', display: 'flex', flexDirection: 'column' }}>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-          <h3 style={{ margin: 0 }}>👤 Player</h3>
+          <h3 style={{ margin: 0 }}>👤 {username}</h3>
           <button className="btn-stop" onClick={stopAction}>✕</button>
         </div>
 

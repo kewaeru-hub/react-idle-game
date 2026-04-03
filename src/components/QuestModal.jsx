@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 function formatTime(ms) {
   if (ms <= 0) return '0s';
-  const hours = Math.floor(ms / 3600000);
+  const days = Math.floor(ms / 86400000);
+  const hours = Math.floor((ms % 86400000) / 3600000);
   const mins = Math.floor((ms % 3600000) / 60000);
   const secs = Math.floor((ms % 60000) / 1000);
+  if (days > 0) return `${days}d ${hours}h ${mins}m`;
   if (hours > 0) return `${hours}h ${mins}m`;
   if (mins > 0) return `${mins}m ${secs}s`;
   return `${secs}s`;
@@ -153,7 +155,8 @@ export default function QuestModal({
     rerollDailyQuest, rerollWeeklyQuest,
     claimQuestReward, claimClanQuestReward,
     getTimeUntilDailyReset, getTimeUntilWeeklyReset,
-    hasQuestUpgrade
+    hasQuestUpgrade,
+    maxDailyQuests, maxWeeklyQuests
   } = quests;
 
   // Update timers every second
@@ -186,6 +189,7 @@ export default function QuestModal({
   let isClanTab = false;
   let resetTime = 0;
   let resetLabel = '';
+  let lockedSlots = 0;
 
   switch (activeTab) {
     case 'daily':
@@ -195,6 +199,7 @@ export default function QuestModal({
       rerollFn = rerollDailyQuest;
       resetTime = timer.daily;
       resetLabel = 'Daily Reset';
+      lockedSlots = hasQuestUpgrade ? 0 : (10 - (maxDailyQuests || 6));
       break;
     case 'weekly':
       currentQuests = weeklyQuests;
@@ -203,6 +208,7 @@ export default function QuestModal({
       rerollFn = rerollWeeklyQuest;
       resetTime = timer.weekly;
       resetLabel = 'Weekly Reset';
+      lockedSlots = hasQuestUpgrade ? 0 : (6 - (maxWeeklyQuests || 4));
       break;
     case 'clan_daily':
       currentQuests = clanDailyQuests;
@@ -291,25 +297,50 @@ export default function QuestModal({
 
       {/* Quest list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
-        {currentQuests.length === 0 ? (
+        {currentQuests.length === 0 && lockedSlots === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#555' }}>
             No quests available. Check back after the reset!
           </div>
         ) : (
-          currentQuests.map((quest, index) => (
-            <QuestCard
-              key={quest.id}
-              quest={quest}
-              canReroll={!isClanTab && currentRerolls > 0}
-              onReroll={() => rerollFn?.(index)}
-              onClaim={claimQuestReward}
-              onClanClaim={claimClanQuestReward}
-              setInventory={setInventory}
-              addXp={addXp}
-              isClan={isClanTab}
-              setClan={setClan}
-            />
-          ))
+          <>
+            {currentQuests.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#555' }}>
+                No quests available. Check back after the reset!
+              </div>
+            )}
+            {currentQuests.map((quest, index) => (
+              <QuestCard
+                key={quest.id}
+                quest={quest}
+                canReroll={!isClanTab && currentRerolls > 0}
+                onReroll={() => rerollFn?.(index)}
+                onClaim={claimQuestReward}
+                onClanClaim={claimClanQuestReward}
+                setInventory={setInventory}
+                addXp={addXp}
+                isClan={isClanTab}
+                setClan={setClan}
+              />
+            ))}
+            {lockedSlots > 0 && Array.from({ length: lockedSlots }, (_, i) => (
+              <div key={`locked-${i}`} style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                border: '1px dashed rgba(255, 255, 255, 0.15)',
+                borderRadius: '8px',
+                padding: '16px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: 0.5
+              }}>
+                <span style={{ fontSize: '18px' }}>🔒</span>
+                <span style={{ fontSize: '13px', color: '#555', fontWeight: 600 }}>
+                  Locked — Buy Quest Upgrade to unlock
+                </span>
+              </div>
+            ))}
+          </>
         )}
       </div>
     </div>

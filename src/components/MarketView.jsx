@@ -15,7 +15,11 @@ export default function MarketView({
   cancelOffer,
   collectOffer,
   collectAllOffers,
-  purchaseMarketSlot
+  purchaseMarketSlot,
+  allOffers,
+  priceSummary,
+  marketLoading,
+  userId
 }) {
   // Modals
   const [showBuyModal, setShowBuyModal] = useState(false);
@@ -33,28 +37,49 @@ export default function MarketView({
   // Popular items list
   const popularItems = ['iron_ore', 'coal_ore', 'cooked_shrimp', 'oak_log', 'bronze_bar', 'steel_bar', 'raw_lobster', 'yew_log'];
 
-  // Generated chart data (simulated)
-  const chartData = useMemo(() => 
-    Array.from({ length: 24 }, (_, i) => {
-      const baseValue = ITEMS[selectedChartItem]?.value || 100;
-      return {
-        hour: i,
-        price: Math.floor(baseValue * (0.7 + Math.random() * 0.6))
-      };
-    }), [selectedChartItem]
-  );
+  // Chart data from recent trades or simulated
+  const chartData = useMemo(() => {
+    // Filter order history for the selected item
+    const itemTrades = orderHistory.filter(t => t.itemId === selectedChartItem);
+    if (itemTrades.length >= 5) {
+      // Use real trades grouped into 24 hourly buckets
+      const now = Date.now();
+      const buckets = Array.from({ length: 24 }, (_, i) => {
+        const hourStart = now - (24 - i) * 3600000;
+        const hourEnd = hourStart + 3600000;
+        const trades = itemTrades.filter(t => t.timestamp >= hourStart && t.timestamp < hourEnd);
+        const avgPrice = trades.length > 0
+          ? Math.round(trades.reduce((sum, t) => sum + t.pricePerItem, 0) / trades.length)
+          : null;
+        return { hour: i, price: avgPrice };
+      });
+      // Fill nulls with nearby values
+      let lastKnown = ITEMS[selectedChartItem]?.value || 100;
+      return buckets.map(b => {
+        if (b.price !== null) { lastKnown = b.price; return b; }
+        return { ...b, price: lastKnown };
+      });
+    }
+    // Fallback: simulated chart
+    const baseValue = ITEMS[selectedChartItem]?.value || 100;
+    return Array.from({ length: 24 }, (_, i) => ({
+      hour: i,
+      price: Math.floor(baseValue * (0.7 + Math.random() * 0.6))
+    }));
+  }, [selectedChartItem, orderHistory]);
 
-  // Popular items dengan simulated data
+  // Popular items dengan real or simulated data
   const popularItemsWithData = useMemo(() => {
     return popularItems.map(itemId => {
       const baseValue = ITEMS[itemId]?.value || 100;
-      const currentPrice = Math.floor(baseValue * (0.85 + Math.random() * 0.3));
-      const prevPrice = Math.floor(baseValue * (0.8 + Math.random() * 0.35));
-      const change = Math.round(((currentPrice - prevPrice) / prevPrice) * 100);
-      const volume = Math.floor(100 + Math.random() * 900);
+      const priceData = priceSummary?.[itemId];
+      const currentPrice = priceData?.avg_price || baseValue;
+      const prevPrice = baseValue;
+      const change = prevPrice > 0 ? Math.round(((currentPrice - prevPrice) / prevPrice) * 100) : 0;
+      const volume = priceData?.total_volume || 0;
       return { itemId, currentPrice, change, volume };
     });
-  }, []);
+  }, [priceSummary]);
 
   const activeOffers = marketOffers.filter(o => o.status === 'active' || o.status === 'completed');
   const maxChartPrice = Math.max(...chartData.map(d => d.price));
@@ -283,9 +308,13 @@ export default function MarketView({
                 <span style={{ color: '#8a9ba8' }}>Current Price:</span>
                 <div>
                   <span style={{ color: '#f1c40f', fontWeight: 'bold', marginRight: '10px' }}>
-                    {ITEMS[selectedChartItem]?.value || 0} gp
+                    {priceSummary?.[selectedChartItem]?.avg_price || ITEMS[selectedChartItem]?.value || 0} gp
                   </span>
-                  <span style={{ color: '#2ecc71', fontWeight: 'bold' }}>↑ 5.2%</span>
+                  {priceSummary?.[selectedChartItem] && (
+                    <span style={{ color: '#8a9ba8', fontSize: '11px' }}>
+                      (Vol: {priceSummary[selectedChartItem].total_volume?.toLocaleString() || 0})
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -567,7 +596,7 @@ export default function MarketView({
                     No recent trades
                   </div>
                 ) : (
-                  orderHistory.slice().reverse().slice(0, 50).map(entry => (
+                  orderHistory.slice(0, 50).map(entry => (
                     <div
                       key={entry.id}
                       className="market-history-row"
@@ -583,6 +612,9 @@ export default function MarketView({
                         {ITEMS[entry.itemId]?.name || entry.itemId}
                       </span>
                       <span style={{ color: '#8a9ba8' }}>x{entry.quantity}</span>
+                      <span style={{ color: '#b0b8c0', fontSize: '10px', marginLeft: '6px', minWidth: '60px' }}>
+                        {entry.buyerName || entry.sellerName || ''}
+                      </span>
                       <span style={{ color: '#f1c40f', fontWeight: 'bold', marginLeft: '8px', minWidth: '90px', textAlign: 'right' }}>
                         {(entry.quantity * entry.pricePerItem).toLocaleString()} gp
                       </span>
@@ -654,7 +686,7 @@ export default function MarketView({
                 No trades yet
               </div>
             ) : (
-              orderHistory.slice().reverse().map(entry => (
+              orderHistory.map(entry => (
                 <div key={entry.id} className="market-history-row">
                   <span style={{
                     color: entry.type === 'buy' ? '#2ecc71' : '#E66100',
@@ -663,9 +695,12 @@ export default function MarketView({
                     {entry.type.toUpperCase()}
                   </span>
                   <span style={{ color: '#F1FAEE', flex: 1, marginLeft: '8px' }}>
-                    {ITEMS[entry.itemId]?.name}
+                    {ITEMS[entry.itemId]?.name || entry.itemId}
                   </span>
                   <span style={{ color: '#8a9ba8' }}>x{entry.quantity}</span>
+                  <span style={{ color: '#b0b8c0', fontSize: '11px', marginLeft: '6px' }}>
+                    {entry.buyerName && entry.sellerName ? `${entry.buyerName} ↔ ${entry.sellerName}` : ''}
+                  </span>
                   <span style={{ color: '#f1c40f', fontWeight: 'bold', marginLeft: '8px' }}>
                     {(entry.quantity * entry.pricePerItem).toLocaleString()} gp
                   </span>

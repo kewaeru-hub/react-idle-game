@@ -396,6 +396,47 @@ export function useQuests(skills, inventory) {
     return didReset;
   }, [lastDailyReset, lastWeeklyReset, generateDailyQuests, generateWeeklyQuests]);
 
+  // Force-generate clan quests when joining/creating a clan mid-day
+  const ensureClanQuests = useCallback((clanMemberCount) => {
+    if (clanMemberCount <= 0) return;
+    // Only generate if clan quests are empty but personal quests exist
+    setClanDailyQuests(prev => {
+      if (prev.length > 0) return prev; // Already have clan daily quests
+      // Generate from existing daily quests
+      const clanQuests = dailyQuests.map(q => ({
+        ...q,
+        id: `clan_${q.id}`,
+        target: q.target * clanMemberCount * 2,
+        progress: 0,
+        completed: false,
+        claimed: false,
+        isClan: true,
+        reward: {
+          coins: q.reward.coins * 3,
+          clanCredits: Math.floor(q.reward.coins / 50) + 5
+        }
+      }));
+      return clanQuests;
+    });
+    setClanWeeklyQuests(prev => {
+      if (prev.length > 0) return prev; // Already have clan weekly quests
+      const clanQuests = weeklyQuests.map(q => ({
+        ...q,
+        id: `clan_${q.id}`,
+        target: q.target * clanMemberCount * 2,
+        progress: 0,
+        completed: false,
+        claimed: false,
+        isClan: true,
+        reward: {
+          coins: q.reward.coins * 3,
+          clanCredits: Math.floor(q.reward.coins / 100) + 10
+        }
+      }));
+      return clanQuests;
+    });
+  }, [dailyQuests, weeklyQuests]);
+
   // Time until next reset
   const getTimeUntilDailyReset = () => {
     const now = Date.now();
@@ -417,6 +458,7 @@ export function useQuests(skills, inventory) {
     maxDailyQuests, maxWeeklyQuests,
     hasQuestUpgrade,
     generateDailyQuests, generateWeeklyQuests,
+    ensureClanQuests,
     rerollDailyQuest, rerollWeeklyQuest,
     recordQuestProgress,
     claimQuestReward, claimClanQuestReward,

@@ -619,7 +619,7 @@ export default function App({ user, signOut }) {
           // Award slayer XP if this monster is the active slayer task
           if (slayer.currentTask && slayer.currentTask.monsterKey === id) {
             const enemyData = ACTIONS[id]?.enemy;
-            const slayerXp = enemyData?.hp ? Math.floor(enemyData.hp * 0.8) : 10;
+            const slayerXp = enemyData?.hp || 10;
             addXp('slayer', slayerXp);
             triggerXpDrop('slayer', slayerXp);
           }
@@ -780,7 +780,7 @@ export default function App({ user, signOut }) {
   }, [quests.dailyQuests, quests.weeklyQuests, quests.clanDailyQuests, quests.clanWeeklyQuests, quests.dailyRerolls, quests.weeklyRerolls, quests.lastDailyReset, quests.lastWeeklyReset]);
 
   // Clan system
-  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment } = useClan();
+  const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment, getBrowseClans, requestJoinClan, reviewJoinRequest } = useClan();
 
   // Refs for clan
   const clanRef = useRef(clan);
@@ -792,8 +792,20 @@ export default function App({ user, signOut }) {
     quests.checkResets(clanMemberCount);
   }, [clanMemberCount]);
 
-  // Market system
-  const { marketOffers, setMarketOffers, marketSlots, setMarketSlots, orderHistory, setOrderHistory, marketScreen, setMarketScreen, createBuyOffer, createSellOffer, cancelOffer, collectOffer, collectAllOffers, purchaseMarketSlot, processMarketTick } = useMarket();
+  // When joining/creating a clan mid-day, ensure clan quests are generated immediately
+  const prevClanRef = useRef(clan);
+  useEffect(() => {
+    const wasClanless = !prevClanRef.current;
+    const hasClanNow = !!clan;
+    prevClanRef.current = clan;
+    if (wasClanless && hasClanNow && clanMemberCount > 0) {
+      quests.ensureClanQuests(clanMemberCount);
+    }
+  }, [clan, clanMemberCount]);
+
+  // Market system (online, Supabase-based)
+  const marketUsername = user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player';
+  const { marketOffers, setMarketOffers, marketSlots, setMarketSlots, orderHistory, setOrderHistory, marketScreen, setMarketScreen, createBuyOffer, createSellOffer, cancelOffer, collectOffer, collectAllOffers, purchaseMarketSlot, processMarketTick, allOffers, priceSummary, loading: marketLoading } = useMarket(user?.id, marketUsername);
 
   // Ref for market save/load
   const marketRef = useRef({ marketOffers, marketSlots, orderHistory });
@@ -843,6 +855,13 @@ export default function App({ user, signOut }) {
               purchaseUpgrade={purchaseUpgrade} inviteMember={inviteMember} updateRecruitment={updateRecruitment}
               inventory={inventory} setInventory={setInventory} ITEM_IMAGES={ITEM_IMAGES}
               skills={skills}
+              quests={quests}
+              setClan={setClan}
+              addXp={addXp}
+              getBrowseClans={getBrowseClans}
+              requestJoinClan={requestJoinClan}
+              reviewJoinRequest={reviewJoinRequest}
+              user={user}
             />
           )}
 
@@ -863,6 +882,10 @@ export default function App({ user, signOut }) {
               purchaseMarketSlot={purchaseMarketSlot}
               ITEM_IMAGES={ITEM_IMAGES}
               ITEMS={ITEMS}
+              allOffers={allOffers}
+              priceSummary={priceSummary}
+              marketLoading={marketLoading}
+              userId={user?.id}
             />
           )}
 
@@ -933,6 +956,7 @@ export default function App({ user, signOut }) {
                     ARMOR={ARMOR}
                     AMMO={AMMO}
                     combatLog={combat.combatLog}
+                    username={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player'}
                   />
                 ) : (
                   <CombatView 
@@ -957,6 +981,7 @@ export default function App({ user, signOut }) {
                     combatLog={combat.combatLog}
                     setScreen={setScreen}
                     combatLevel={combatLevel}
+                    username={user?.user_metadata?.display_name || user?.email?.split('@')[0] || 'Player'}
                   />
                 )
               ) : screen === 'infusion' ? (

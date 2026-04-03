@@ -41,6 +41,23 @@ export function useCloudSave(
 ) {
   const saveInProgress = useRef(false);
   const hasLoaded = useRef({});
+  const loadComplete = useRef(false); // Gate: prevents saving before initial load finishes
+
+  // Keep refs for all closure-captured values so buildGameState always reads latest
+  const equipmentRef = useRef(equipment);
+  const combatStyleRef = useRef(combatStyle);
+  const quickPrayersRef = useRef(quickPrayers);
+  const claimedToolsRef = useRef(claimedTools);
+  const toolboxesRef = useRef(toolboxes);
+  const clanSaveRef = useRef(clan);
+  const activeActionRef = useRef(activeAction);
+  equipmentRef.current = equipment;
+  combatStyleRef.current = combatStyle;
+  quickPrayersRef.current = quickPrayers;
+  claimedToolsRef.current = claimedTools;
+  toolboxesRef.current = toolboxes;
+  clanSaveRef.current = clan;
+  activeActionRef.current = activeAction;
 
   // Helper: check if user has loaded (per userId)
   const userHasLoaded = (uid) => {
@@ -58,21 +75,21 @@ export function useCloudSave(
     return {
       skills: cleanSkills,
       inventory: inventoryRef.current,
-      equipment,
-      combatStyle,
-      quickPrayers,
-      claimedTools,
-      toolboxes,
+      equipment: equipmentRef.current,
+      combatStyle: combatStyleRef.current,
+      quickPrayers: quickPrayersRef.current,
+      claimedTools: claimedToolsRef.current,
+      toolboxes: toolboxesRef.current,
       inventoryOrder: inventoryOrderRef?.current || [],
-      clan,
+      clan: clanSaveRef.current,
       market: marketRef?.current || null,
       slayer: slayerRef?.current || null,
       monsterStats: monsterStatsRef?.current || {},
       quests: questRef?.current || null,
       lastSaveTimestamp: Date.now(),
-      activeAction
+      activeAction: activeActionRef.current
     };
-  }, [equipment, combatStyle, quickPrayers, claimedTools, toolboxes, clan, activeAction]);
+  }, []); // No deps needed — all values read from refs
 
   // Helper: pas een parsed save toe op alle state setters
   const applySave = useCallback((parsed) => {
@@ -199,7 +216,7 @@ export function useCloudSave(
   // ===== A. LADEN BIJ OPSTARTEN =====
   useEffect(() => {
     if (!userId || userHasLoaded(userId)) return;
-    markUserAsLoaded(userId);
+    // Don't mark as loaded yet — wait for async load to complete
 
     const loadSave = async () => {
       let cloudParsed = null;
@@ -246,10 +263,13 @@ export function useCloudSave(
 
       if (!parsed) {
         console.log('New player — no save found');
-        return;
+      } else {
+        applySave(parsed);
       }
 
-      applySave(parsed);
+      // Mark as loaded AFTER save is applied (or confirmed no save exists)
+      markUserAsLoaded(userId);
+      loadComplete.current = true;
     };
 
     loadSave();
@@ -261,6 +281,7 @@ export function useCloudSave(
 
     const saveInterval = setInterval(async () => {
       if (saveInProgress.current) return;
+      if (!loadComplete.current) return; // Don't save before initial load completes
       saveInProgress.current = true;
 
       const gameState = buildGameState();
@@ -313,6 +334,7 @@ export function useCloudSave(
     if (!userId) return;
 
     const handleBeforeUnload = () => {
+      if (!loadComplete.current) return; // Don't save before initial load completes
       const gameState = buildGameState();
       try {
         localStorage.setItem(getLocalSaveKey(userId), JSON.stringify(gameState));

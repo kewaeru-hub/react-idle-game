@@ -7,7 +7,7 @@ const monsters = {
         offAtt: { melee: 1, ranged: 0, magic: 0 },
         defBonus: { melee: 0, ranged: 0, magic: 0 },
         attackSpeed: 3,
-        type: 'melee'
+        type: 'prayer-eater'
     },
     "archer": {
         hp: 5,
