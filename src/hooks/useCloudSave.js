@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { calculateOfflineProgress } from '../utils/offlineProgress';
+import { SLAYER_MASTERS } from '../data/gameData';
 
 const getLocalSaveKey = (userId) => {
   return userId ? `idleScape_save_v1_${userId}` : 'idleScape_save_v1';
@@ -35,7 +36,8 @@ export function useCloudSave(
   inventoryOrderRef, setInventoryOrder,
   slayerRef, setSlayerCurrentTask, setSlayerPoints, setSlayerConsecutive,
   stopAction,
-  monsterStatsRef, setMonsterStats
+  monsterStatsRef, setMonsterStats,
+  questRef, questHook
 ) {
   const saveInProgress = useRef(false);
   const hasLoaded = useRef({});
@@ -66,6 +68,7 @@ export function useCloudSave(
       market: marketRef?.current || null,
       slayer: slayerRef?.current || null,
       monsterStats: monsterStatsRef?.current || {},
+      quests: questRef?.current || null,
       lastSaveTimestamp: Date.now(),
       activeAction
     };
@@ -107,6 +110,18 @@ export function useCloudSave(
         if (typeof parsed.slayer.consecutive === 'number' && setSlayerConsecutive) setSlayerConsecutive(parsed.slayer.consecutive);
       }
 
+      // Restore quest state
+      if (parsed.quests && questHook) {
+        if (parsed.quests.dailyQuests) questHook.setDailyQuests(parsed.quests.dailyQuests);
+        if (parsed.quests.weeklyQuests) questHook.setWeeklyQuests(parsed.quests.weeklyQuests);
+        if (parsed.quests.clanDailyQuests) questHook.setClanDailyQuests(parsed.quests.clanDailyQuests);
+        if (parsed.quests.clanWeeklyQuests) questHook.setClanWeeklyQuests(parsed.quests.clanWeeklyQuests);
+        if (typeof parsed.quests.dailyRerolls === 'number') questHook.setDailyRerolls(parsed.quests.dailyRerolls);
+        if (typeof parsed.quests.weeklyRerolls === 'number') questHook.setWeeklyRerolls(parsed.quests.weeklyRerolls);
+        if (parsed.quests.lastDailyReset) questHook.setLastDailyReset(parsed.quests.lastDailyReset);
+        if (parsed.quests.lastWeeklyReset) questHook.setLastWeeklyReset(parsed.quests.lastWeeklyReset);
+      }
+
       // Offline progressie berekening
       if (parsed.lastSaveTimestamp && parsed.activeAction && ACTIONS) {
         const offlineData = calculateOfflineProgress(
@@ -117,7 +132,8 @@ export function useCloudSave(
           loadedInventory,
           ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS,
           TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS,
-          parsed.toolboxes || toolboxes
+          parsed.toolboxes || toolboxes,
+          parsed.combatStyle || 'attack'
         );
         if (offlineData) {
           setInventory(offlineData.newInventory);
@@ -146,6 +162,24 @@ export function useCloudSave(
               });
               return updated;
             });
+          }
+          
+          // Apply offline kills to slayer task if applicable
+          if (offlineData.isCombat && offlineData.totalActions > 0) {
+            const savedTask = parsed.slayer?.currentTask;
+            if (savedTask && parsed.activeAction === savedTask.monsterKey) {
+              const newCompleted = savedTask.killsCompleted + offlineData.totalActions;
+              if (newCompleted >= savedTask.killsNeeded) {
+                // Task completed during offline! Award points
+                const master = SLAYER_MASTERS.find(m => m.id === savedTask.masterId);
+                if (master && setSlayerPoints) setSlayerPoints(p => p + master.points);
+                if (setSlayerConsecutive) setSlayerConsecutive(c => c + 1);
+                if (setSlayerCurrentTask) setSlayerCurrentTask(null); // Clear completed task
+              } else {
+                // Task not yet complete, update kills count
+                if (setSlayerCurrentTask) setSlayerCurrentTask({ ...savedTask, killsCompleted: newCompleted });
+              }
+            }
           }
           if (setOfflineProgress) setOfflineProgress(offlineData);
         }
@@ -291,7 +325,40 @@ export function useCloudSave(
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [userId, buildGameState]);
 
-  // ===== D. HARD RESET =====
+  // ===== D. FORCE SAVE (for logout, etc.) =====
+  const forceSave = useCallback(async () => {
+    const gameState = buildGameState();
+
+    // Always save to localStorage first (fast, reliable)
+    try {
+      localStorage.setItem(getLocalSaveKey(userId), JSON.stringify(gameState));
+    } catch (e) {
+      console.error('Local save failed:', e);
+    }
+
+    // Then try cloud save
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/save-game`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`,
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+            },
+            body: JSON.stringify({ save_data: gameState })
+          }
+        );
+      }
+    } catch (e) {
+      console.error('Cloud save error during forceSave:', e);
+    }
+  }, [userId, buildGameState]);
+
+  // ===== E. HARD RESET =====
   const hardResetGame = async () => {
     if (!window.confirm('Are you sure you want to completely wipe your save? This cannot be undone!')) return;
 
@@ -312,5 +379,5 @@ export function useCloudSave(
     window.location.reload();
   };
 
-  return { hardResetGame };
+  return { hardResetGame, forceSave };
 }

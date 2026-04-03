@@ -7,7 +7,7 @@ export default function SkillingView({
   screen, ACTIONS, skills, activeAction, startAction, startCombat, stopAction, getItemCount,
   quickPrayers, setQuickPrayers, getActualActionTime, progress, getRequiredXp, claimToolCallback, claimedTools = {},
   toolboxes = {}, upgradeToolbox, storeToolInBox, inventory = {}, toggleEquip, equipment = {}, equipToolFromBox,
-  infuseTool
+  infuseTool, combatLevel = 0
 }) {
   const screenActions = Object.entries(ACTIONS).filter(([k, v]) => v.skill === screen);
 
@@ -85,7 +85,7 @@ export default function SkillingView({
 
   const displayActions = [...filteredActions].sort((a, b) => a[1].reqLvl - b[1].reqLvl);
 
-  const currentLevel = skills[screen]?.level || 1;
+  const currentLevel = screen === 'combat' ? combatLevel : (skills[screen]?.level || 1);
   const currentXp = Math.floor(skills[screen]?.xp || 0);
   const currentLevelStartXP = getRequiredXp ? getRequiredXp(currentLevel) : 0;
   const nextLevelTotalXP = getRequiredXp ? getRequiredXp(currentLevel + 1) : 100;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Sidebar({ screen, setScreen, skills, activeAction, ACTIONS }) {
+export default function Sidebar({ screen, setScreen, skills, activeAction, ACTIONS, combatLevel = 0 }) {
   const isCombatActive = activeAction && ACTIONS?.[activeAction]?.skill === 'combat' && screen === 'combat';
   const SKILLS = [
     { id: 'combat',     icon: '⚔️' },
@@ -37,7 +37,7 @@ export default function Sidebar({ screen, setScreen, skills, activeAction, ACTIO
                 {id.charAt(0).toUpperCase() + id.slice(1)}
               </span>
               <small className="sidebar-item-level">
-                Lv.{skills[id]?.level || 1}
+                Lv.{id === 'combat' ? combatLevel : (skills[id]?.level || 1)}
               </small>
               {isActive && <span className="sidebar-item-check">✓</span>}
             </div>

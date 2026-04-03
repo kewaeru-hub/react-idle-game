@@ -60,7 +60,8 @@ export function useSaveLoad(skillsRef, inventoryRef, equipment, combatStyle, qui
             TOOL_SKILLS,
             TOOL_DROP_HOURS,
             PET_DROP_HOURS,
-            parsed.toolboxes || toolboxes
+            parsed.toolboxes || toolboxes,
+            parsed.combatStyle || 'attack'
           );
           
           if (offlineData) {

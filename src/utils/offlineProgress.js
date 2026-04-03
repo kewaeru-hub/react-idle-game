@@ -30,7 +30,8 @@ export function calculateOfflineProgress(
   TOOL_SKILLS,
   TOOL_DROP_HOURS,
   PET_DROP_HOURS,
-  toolboxes
+  toolboxes,
+  combatStyle = 'attack'
 ) {
   // 1. Bereken offline tijd
   const offlineMs = Date.now() - lastSaveTimestamp;
@@ -44,7 +45,7 @@ export function calculateOfflineProgress(
   if (!activeAction || !ACTIONS[activeAction]) return null;
   const actionData = ACTIONS[activeAction];
   if (actionData.skill === 'combat') {
-    return calculateOfflineCombat(cappedMs, activeAction, actionData, skills, equipment, inventory, WEAPONS, ARMOR, AMMO, PETS, ITEMS);
+    return calculateOfflineCombat(cappedMs, activeAction, actionData, skills, equipment, inventory, WEAPONS, ARMOR, AMMO, PETS, ITEMS, combatStyle);
   }
   // Skip thieving for offline simulation — thieving uses its own target loop
   // and the placeholder `thieving` action may lack `reward`/`cost` fields.
@@ -288,7 +289,7 @@ export function calculateOfflineProgress(
  */
 function calculateOfflineCombat(
   cappedMs, activeAction, actionData, skills, equipment, inventory,
-  WEAPONS, ARMOR, AMMO, PETS, ITEMS
+  WEAPONS, ARMOR, AMMO, PETS, ITEMS, savedCombatStyle = 'attack'
 ) {
   const enemy = actionData.enemy;
   if (!enemy) return null;
@@ -314,10 +315,12 @@ function calculateOfflineCombat(
   const ammoId = equipment?.ammo;
   const ammoRangedStr = ammoId ? (AMMO[ammoId]?.rangedStr || 0) : 0;
 
-  // Determine combat style from weapon type
-  let combatStyle = 'attack';
+  // Determine combat style: use saved style, but verify it's valid for weapon type
+  let combatStyle = savedCombatStyle;
+  // If ranged/magic weapon override to ranged/magic (user can't use melee styles with these weapons)
   if (weapon.type === 'ranged') combatStyle = 'ranged';
   else if (weapon.type === 'magic') combatStyle = 'magic';
+  // else: melee weapon — use saved style (can be 'attack', 'strength', or 'defence')
 
   const maxHp = skills.hitpoints?.level || 10;
   const attackLevel = skills.attack?.level || 1;

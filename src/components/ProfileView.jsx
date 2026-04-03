@@ -21,7 +21,7 @@ function formatTime(ms) {
   return `${hrs}h ${remMins}m`;
 }
 
-export default function ProfileView({ skills, inventory, user, claimAllTools, claimedTools = {}, TOOL_SKILLS = {}, monsterStats = {}, ACTIONS = {}, ITEM_IMAGES = {} }) {
+export default function ProfileView({ skills, inventory, user, claimAllTools, claimedTools = {}, TOOL_SKILLS = {}, monsterStats = {}, ACTIONS = {}, ITEM_IMAGES = {}, combatLevel = 0 }) {
   const [showToolPopup, setShowToolPopup] = useState(false);
   const [showCongratsPopup, setShowCongratsPopup] = useState(false);
   const [showCollectionLog, setShowCollectionLog] = useState(false);
@@ -46,8 +46,10 @@ export default function ProfileView({ skills, inventory, user, claimAllTools, cl
     return groups;
   }, [ACTIONS]);
 
-  // Bereken totalen
-  const totalLevel = Object.values(skills).reduce((sum, s) => sum + s.level, 0);
+  // Bereken totalen (exclude 'combat' skill since it's always 1, use calculated combatLevel instead)
+  const totalLevel = Object.entries(skills)
+    .filter(([name]) => name !== 'combat')
+    .reduce((sum, [, s]) => sum + s.level, 0) + combatLevel;
   const totalXp = Math.floor(Object.values(skills).reduce((sum, s) => sum + s.xp, 0));
   
   // Bereken huidge offline uren
@@ -113,7 +115,16 @@ export default function ProfileView({ skills, inventory, user, claimAllTools, cl
           </div>
           
           <div className="skills-container">
-            {Object.entries(skills).map(([name, data]) => (
+            {/* Show Combat Level first */}
+            <div className="skill-badge" style={{ backgroundColor: '#1a2a3a', borderColor: '#f1c40f' }}>
+              <span>⚔️ combat</span>
+              <strong style={{ color: '#f1c40f' }}>Lv. {combatLevel}</strong>
+            </div>
+            
+            {/* Show other skills (excluding 'combat' from skills.combat) */}
+            {Object.entries(skills)
+              .filter(([name]) => name !== 'combat')
+              .map(([name, data]) => (
               <div key={name} className="skill-badge">
                 <span>{name}</span>
                 <strong>Lv. {data.level}</strong>

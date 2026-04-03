@@ -79,5 +79,16 @@ export function useShop(setInventory, inventory) {
     }
   };
 
-  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat };
+  // Functie 7: Quest Upgrade kopen (meer quests & rerolls)
+  const buyQuestUpgrade = (cost) => {
+    if ((inventory.coins || 0) >= cost) {
+      setInventory(prev => ({
+        ...prev,
+        coins: prev.coins - cost,
+        questUpgrade: 1
+      }));
+    }
+  };
+
+  return { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade };
 }

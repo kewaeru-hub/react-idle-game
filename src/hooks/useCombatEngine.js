@@ -130,7 +130,7 @@ function computeDamage(attacker, defender, prayersRef, slayerBonus = 1.0, isPlay
   }
 
   // --- Roll damage + apply prayer & slayer ---
-  const rawHit = Math.floor(Math.random() * maxHit) + 1;
+  const rawHit = Math.floor(Math.random() * (maxHit + 1));
   const withSlayer = Math.floor(rawHit * slayerBonus);
   const withPrayer = isPlayerAttack
     ? Math.floor(withSlayer * offensiveBuff)

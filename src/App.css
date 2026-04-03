@@ -1054,6 +1054,45 @@ input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
   .equip-slot { font-size: 8px !important; border-width: 1px !important; min-height: 32px !important; padding: 1px !important; }
 
   .sidebar-category { font-family: 'Nunito', sans-serif !important; font-size: 9px !important; padding: 4px !important; letter-spacing: 0 !important; display: none; /* Hide categories on mobile for clean hub */ }
+
+  /* --- POPUP/MODAL LANDSCAPE SCALING --- */
+  .popup-overlay {
+    padding: 4px !important;
+    align-items: flex-start !important;
+    padding-top: 45px !important;
+  }
+
+  .popup-box {
+    max-width: 92vw !important;
+    max-height: calc(100dvh - 55px) !important;
+    overflow-y: auto !important;
+    padding: 10px !important;
+    font-size: 11px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .popup-box h1, .popup-box h2 {
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .popup-box h3, .popup-box h4 {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .popup-box p, .popup-box div, .popup-box span, .popup-box label {
+    font-size: 11px !important;
+  }
+
+  .popup-box button {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  .popup-box input[type="range"] {
+    height: 20px !important;
+  }
 }
 
 /* --- REACT INLINE STYLE OVERRIDES --- */

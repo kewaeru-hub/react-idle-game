@@ -3,6 +3,25 @@
 export const SKILL_LIST = ['attack', 'strength', 'defence', 'ranged', 'magic', 'hitpoints', 'combat', 'slayer', 'prayer', 'woodcutting', 'fishing', 'cooking', 'mining', 'smithing', 'infusion', 'thieving', 'farming', 'foraging', 'herblore', 'crafting', 'agility'];
 
 // ==========================================
+// --- COMBAT LEVEL CALCULATION ---
+// ==========================================
+export function calculateCombatLevel(attack, strength, defence, hp, prayer, ranged, magic) {
+  // Stap 1: Base stats
+  const base = 0.25 * (defence + hp + Math.floor(prayer / 2));
+  
+  // Stap 2: Offensive stats
+  const melee = 0.325 * (attack + strength);
+  const range = 0.325 * Math.floor(ranged * 1.5);
+  const mage = 0.325 * Math.floor(magic * 1.5);
+  
+  // Stap 3: Hoogste offensive stat bepalen
+  const highestOffensive = Math.max(melee, range, mage);
+  
+  // Stap 4: Totaal afronden naar beneden
+  return Math.floor(base + highestOffensive);
+}
+
+// ==========================================
 // --- TOOLS (CONSTANTS & MAPPING) ---
 // ==========================================
 export const TOOL_SKILLS = {

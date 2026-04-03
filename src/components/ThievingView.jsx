@@ -6,7 +6,7 @@ export default function ThievingView({
   skills, activeAction, setActiveAction, addXp, triggerXpDrop,
   setInventory, setSessionStats, THIEVING_TARGETS, stopAction, progress, setProgress, equipment, triggerPetNotification,
   claimToolCallback, claimedTools = {}, toolboxes = {}, upgradeToolbox, storeToolInBox,
-  inventory = {}, equipToolFromBox, infuseTool, toggleEquip
+  inventory = {}, equipToolFromBox, infuseTool, toggleEquip, onActionComplete
 }) {
   const [activeTarget, setActiveTarget] = useState(null); // Separate state for thieving target
   const [stunned, setStunned] = useState(false);
@@ -152,6 +152,7 @@ export default function ThievingView({
             actionsCompleted: prev.actionsCompleted + 1,
             itemsGained: prev.itemsGained + 1
           }));
+          if (onActionComplete) onActionComplete(target.id);
         }
       } else {
         // GESTUNNED
@@ -224,6 +225,7 @@ export default function ThievingView({
               actionsCompleted: prev.actionsCompleted + 1,
               itemsGained: prev.itemsGained + 1
             }));
+            if (onActionComplete) onActionComplete(target.id);
           } else {
             setLastResult('stunned');
             setPetSaved(false);

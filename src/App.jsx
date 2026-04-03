@@ -27,7 +27,7 @@ import bgImage from './assets/Backgrounds/bg-farm.jpg';
 import lavaBg from './assets/Backgrounds/LavaCave_Background.png';
 
 // Data & Helpers
-import { ARMOR, SKILL_LIST, WEAPONS, ACTIONS, AMMO, ITEMS, SLAYER_MASTERS, THIEVING_TARGETS, POTION_EFFECTS, PRAYER_BOOK, ITEM_IMAGES, PETS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS } from './data/gameData';
+import { ARMOR, SKILL_LIST, WEAPONS, ACTIONS, AMMO, ITEMS, SLAYER_MASTERS, THIEVING_TARGETS, POTION_EFFECTS, PRAYER_BOOK, ITEM_IMAGES, PETS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, calculateCombatLevel } from './data/gameData';
 import { getRequiredXp, getSkillingSpeedMultiplier } from './utils/gameHelpers';
 import { monsters as fightCaveMonsters, waves as fightCaveWaves } from './data/fightCaveData';
 
@@ -42,6 +42,7 @@ import { useFightCave } from './hooks/useFightCave';
 import { useClan } from './hooks/useClan';
 import { useMarket } from './hooks/useMarket';
 import { useSlayer } from './hooks/useSlayer';
+import { useQuests } from './hooks/useQuests';
 
 export default function App({ user, signOut }) {
   // --- 1. BASIC STATE ---
@@ -555,6 +556,17 @@ export default function App({ user, signOut }) {
 
   const maxHp = skills.hitpoints?.level || 10;
   const maxPrayer = skills.prayer?.level || 10;
+  
+  // Calculate combat level from component skills
+  const combatLevel = calculateCombatLevel(
+    skills.attack?.level || 1,
+    skills.strength?.level || 1,
+    skills.defence?.level || 1,
+    skills.hitpoints?.level || 10,
+    skills.prayer?.level || 10,
+    skills.ranged?.level || 1,
+    skills.magic?.level || 1
+  );
 
   const combat = useCombat(
     activeAction, ACTIONS, skills, { maxHp, maxPrayer }, 
@@ -604,6 +616,15 @@ export default function App({ user, signOut }) {
         },
         onAllEnemiesDead: () => {
           slayer.recordKill(id);
+          // Award slayer XP if this monster is the active slayer task
+          if (slayer.currentTask && slayer.currentTask.monsterKey === id) {
+            const enemyData = ACTIONS[id]?.enemy;
+            const slayerXp = enemyData?.hp ? Math.floor(enemyData.hp * 0.8) : 10;
+            addXp('slayer', slayerXp);
+            triggerXpDrop('slayer', slayerXp);
+          }
+          // Quest progress: record combat kill
+          questRecordRef.current(id);
           // Track monster stats: kills, loot, time
           const actionData = ACTIONS[id];
           const killTimeMs = combatStartTime.current ? Date.now() - combatStartTime.current : 0;
@@ -719,7 +740,7 @@ export default function App({ user, signOut }) {
   }, [combatStyle]);
 
   // Skilling engine
-  useSkilling(activeAction, ACTIONS, skills, equipment, inventoryRef, setProgress, setInventory, addXp, triggerXpDrop, setSessionStats, stopAction, WEAPONS, ARMOR, AMMO, triggerPetNotification, TOOL_SKILLS, TOOL_DROP_HOURS, toolboxes, onToolDropped);
+  useSkilling(activeAction, ACTIONS, skills, equipment, inventoryRef, setProgress, setInventory, addXp, triggerXpDrop, setSessionStats, stopAction, WEAPONS, ARMOR, AMMO, triggerPetNotification, TOOL_SKILLS, TOOL_DROP_HOURS, toolboxes, onToolDropped, (actionId) => questRecordRef.current(actionId));
 
   // Slayer system
   const [slayerTaskComplete, setSlayerTaskComplete] = useState(null);
@@ -734,7 +755,29 @@ export default function App({ user, signOut }) {
   useEffect(() => { slayerRef.current = { currentTask: slayer.currentTask, slayerPoints: slayer.slayerPoints, consecutive: slayer.consecutive }; }, [slayer.currentTask, slayer.slayerPoints, slayer.consecutive]);
 
   // Shop functions
-  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat } = useShop(setInventory, inventory);
+  const { sellItemToShop, buyItemFromShop, buyUpgrade, buyOfflineUpgrade, buyAutoToolUpgrade, buyAutoEat, buyQuestUpgrade } = useShop(setInventory, inventory);
+
+  // Quest system
+  const quests = useQuests(skills, inventory);
+
+  // Quest progress: on combat kill
+  const questRecordRef = useRef(quests.recordQuestProgress);
+  useEffect(() => { questRecordRef.current = quests.recordQuestProgress; }, [quests.recordQuestProgress]);
+
+  // Quest ref for save/load
+  const questRef = useRef(null);
+  useEffect(() => {
+    questRef.current = {
+      dailyQuests: quests.dailyQuests,
+      weeklyQuests: quests.weeklyQuests,
+      clanDailyQuests: quests.clanDailyQuests,
+      clanWeeklyQuests: quests.clanWeeklyQuests,
+      dailyRerolls: quests.dailyRerolls,
+      weeklyRerolls: quests.weeklyRerolls,
+      lastDailyReset: quests.lastDailyReset,
+      lastWeeklyReset: quests.lastWeeklyReset
+    };
+  }, [quests.dailyQuests, quests.weeklyQuests, quests.clanDailyQuests, quests.clanWeeklyQuests, quests.dailyRerolls, quests.weeklyRerolls, quests.lastDailyReset, quests.lastWeeklyReset]);
 
   // Clan system
   const { clan, clanScreen, setClanScreen, setClan, createClan, joinClan, leaveClan, promoteMember, demoteMember, kickMember, depositToVault, withdrawFromVault, claimQuestReward, upgradeClanHouse, purchaseUpgrade, inviteMember, updateRecruitment } = useClan();
@@ -742,6 +785,12 @@ export default function App({ user, signOut }) {
   // Refs for clan
   const clanRef = useRef(clan);
   useEffect(() => { clanRef.current = clan; }, [clan]);
+
+  // Check daily/weekly resets & generate quests on load (must be after useClan so clan is defined)
+  const clanMemberCount = clan?.members?.length || 0;
+  useEffect(() => {
+    quests.checkResets(clanMemberCount);
+  }, [clanMemberCount]);
 
   // Market system
   const { marketOffers, setMarketOffers, marketSlots, setMarketSlots, orderHistory, setOrderHistory, marketScreen, setMarketScreen, createBuyOffer, createSellOffer, cancelOffer, collectOffer, collectAllOffers, purchaseMarketSlot, processMarketTick } = useMarket();
@@ -751,7 +800,13 @@ export default function App({ user, signOut }) {
   useEffect(() => { marketRef.current = { marketOffers, marketSlots, orderHistory }; }, [marketOffers, marketSlots, orderHistory]);
 
   // Save/Load system (Cloud + Local hybrid)
-  const { hardResetGame } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, slayerRef, slayer.setCurrentTask, slayer.setSlayerPoints, slayer.setConsecutive, stopAction, monsterStatsRef, setMonsterStats);
+  const { hardResetGame, forceSave } = useCloudSave(user?.id, skillsRef, inventoryRef, equipment, combatStyle, quickPrayers, clanRef.current, setSkills, setInventory, setEquipment, setCombatStyle, setQuickPrayers, setClan, marketRef, setMarketOffers, setMarketSlots, setOrderHistory, activeAction, setActiveAction, ACTIONS, WEAPONS, ARMOR, AMMO, PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS, claimedTools, setClaimedTools, toolboxes, setToolboxes, addXp, setOfflineProgress, inventoryOrderRef, setInventoryOrder, slayerRef, slayer.setCurrentTask, slayer.setSlayerPoints, slayer.setConsecutive, stopAction, monsterStatsRef, setMonsterStats, questRef, quests);
+
+  // Wrap signOut to force save first
+  const handleSignOut = async () => {
+    await forceSave();
+    signOut();
+  };
 
   // Market simulation tick (elke 4 seconden)
   useEffect(() => {
@@ -769,15 +824,15 @@ export default function App({ user, signOut }) {
       <LevelUpToast levelUps={levelUps} activeAction={activeAction} ACTIONS={ACTIONS} screen={screen} />
 
       <div className="main-area">
-        <TopBar inventory={inventory} screen={screen} skills={skills} setScreen={setScreen} setActivePopup={setActivePopup} hardResetGame={hardResetGame} signOut={signOut} user={user} />
+        <TopBar inventory={inventory} screen={screen} skills={skills} setScreen={setScreen} setActivePopup={setActivePopup} hardResetGame={hardResetGame} signOut={handleSignOut} user={user} />
 
         <div className="main-body">
-        <Sidebar screen={screen} setScreen={setScreen} skills={skills} activeAction={activeAction} ACTIONS={ACTIONS} />
+        <Sidebar screen={screen} setScreen={setScreen} skills={skills} activeAction={activeAction} ACTIONS={ACTIONS} combatLevel={combatLevel} />
 
         <main className="content-area">
-          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} claimAllTools={claimAllTools} claimedTools={claimedTools} TOOL_SKILLS={TOOL_SKILLS} monsterStats={monsterStats} ACTIONS={ACTIONS} ITEM_IMAGES={ITEM_IMAGES} />}
+          {screen === 'profile' && <ProfileView skills={skills} inventory={inventory} user={user} claimAllTools={claimAllTools} claimedTools={claimedTools} TOOL_SKILLS={TOOL_SKILLS} monsterStats={monsterStats} ACTIONS={ACTIONS} ITEM_IMAGES={ITEM_IMAGES} combatLevel={combatLevel} />}
           {screen === 'inventory' && <InventoryView inventory={inventory} ARMOR={ARMOR} equipment={equipment} equipmentAmounts={equipmentAmounts} WEAPONS={WEAPONS} AMMO={AMMO} toggleEquip={toggleEquip} combatStyle={combatStyle} setCombatStyle={setCombatStyle} sellItemToShop={sellItemToShop} setActivePopup={setActivePopup} depositToVault={depositToVault} clan={clan} setInventory={setInventory} inventoryOrder={inventoryOrder} setInventoryOrder={setInventoryOrder} />}
-          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} buyAutoEat={buyAutoEat} />}
+          {screen === 'shop' && <ShopView inventory={inventory} buyItem={buyItemFromShop} buyUpgrade={buyUpgrade} buyOfflineUpgrade={buyOfflineUpgrade} buyAutoToolUpgrade={buyAutoToolUpgrade} buyAutoEat={buyAutoEat} buyQuestUpgrade={buyQuestUpgrade} />}
           {screen === 'clan' && (
             <ClanView 
               clan={clan} clanScreen={clanScreen} setClanScreen={setClanScreen}
@@ -787,6 +842,7 @@ export default function App({ user, signOut }) {
               claimQuestReward={claimQuestReward} upgradeClanHouse={upgradeClanHouse}
               purchaseUpgrade={purchaseUpgrade} inviteMember={inviteMember} updateRecruitment={updateRecruitment}
               inventory={inventory} setInventory={setInventory} ITEM_IMAGES={ITEM_IMAGES}
+              skills={skills}
             />
           )}
 
@@ -847,6 +903,7 @@ export default function App({ user, signOut }) {
               equipToolFromBox={equipToolFromBox}
               infuseTool={infuseTool}
               toggleEquip={toggleEquip}
+              onActionComplete={(actionId) => questRecordRef.current(actionId)}
             />
           </div>
 
@@ -899,6 +956,7 @@ export default function App({ user, signOut }) {
                     slayerTask={slayer.currentTask}
                     combatLog={combat.combatLog}
                     setScreen={setScreen}
+                    combatLevel={combatLevel}
                   />
                 )
               ) : screen === 'infusion' ? (
@@ -930,6 +988,7 @@ export default function App({ user, signOut }) {
                   toolboxes={toolboxes} upgradeToolbox={upgradeToolbox} storeToolInBox={storeToolInBox}
                   inventory={inventory} toggleEquip={toggleEquip} equipment={equipment} equipToolFromBox={equipToolFromBox}
                   infuseTool={infuseTool}
+                  combatLevel={combatLevel}
                   getActualActionTime={(id) => {
                     const action = ACTIONS[id];
                     if (!action) return 0;
@@ -989,7 +1048,7 @@ export default function App({ user, signOut }) {
       {activePopup && (
         <div className="popup-overlay" onClick={() => setActivePopup(null)}>
           <div className="popup-box" onClick={e => e.stopPropagation()}>
-            {activePopup === 'Quests' && <QuestModal />}
+            {activePopup === 'Quests' && <QuestModal quests={quests} close={() => setActivePopup(null)} setInventory={setInventory} addXp={addXp} clan={clan} setClan={setClan} />}
             {activePopup === 'Upgrades' && <UpgradeModal inventory={inventory} buyUpgrade={buyUpgrade} close={() => setActivePopup(null)} />}
             {activePopup === 'Analytics' && (
               <AnalyticsModal 

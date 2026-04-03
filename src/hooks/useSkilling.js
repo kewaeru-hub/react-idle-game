@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { getSkillingSpeedMultiplier, getActivePet } from '../utils/gameHelpers';
 import { PETS, ITEMS, TOOL_SKILLS, TOOL_DROP_HOURS, PET_DROP_HOURS } from '../data/gameData';
 
-export function useSkilling(activeAction, ACTIONS, skills, equipment, inventoryRef, setProgress, setInventory, addXp, triggerXpDrop, setSessionStats, stopAction, WEAPONS, ARMOR, AMMO, triggerPetNotification, TOOL_SKILLS, TOOL_DROP_HOURS, toolboxes, onToolDropped) {
+export function useSkilling(activeAction, ACTIONS, skills, equipment, inventoryRef, setProgress, setInventory, addXp, triggerXpDrop, setSessionStats, stopAction, WEAPONS, ARMOR, AMMO, triggerPetNotification, TOOL_SKILLS, TOOL_DROP_HOURS, toolboxes, onToolDropped, onActionComplete) {
   useEffect(() => {
     if (!activeAction || !ACTIONS[activeAction] || ACTIONS[activeAction].skill === 'combat' || ACTIONS[activeAction].skill === 'thieving') {
       return;
@@ -227,6 +227,8 @@ export function useSkilling(activeAction, ACTIONS, skills, equipment, inventoryR
         actionsCompleted: prev.actionsCompleted + 1,
         itemsGained: prev.itemsGained + (data.reward ? 1 : 0)
       }));
+      // Notify quest system of completed action
+      if (onActionComplete) onActionComplete(activeAction);
     }, actualTimeMs);
 
     // DE VISUELE UPDATE (Kijkt naar de klok, niet naar hoeveel ticks er zijn geweest)
